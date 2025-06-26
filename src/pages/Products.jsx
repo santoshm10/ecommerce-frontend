@@ -6,6 +6,8 @@ import { useAppContext } from "../contexts/AppContext";
 
 const Products = () => {
   const { category: routeCategory } = useParams();
+  console.log("routeCategory", routeCategory);
+
   const {
     category,
     selectCategory,
@@ -16,24 +18,31 @@ const Products = () => {
     sort,
     handleAddToCart,
     count,
+    userId,
+    handleCartAlert,
   } = useAppContext();
+
+  console.log("userId", userId);
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/products"
   );
 
+  console.log("data", data);
   const filteredData =
     data?.filter((product) => {
       const categoryMatch =
         routeCategory && routeCategory !== "All"
-          ? product.category === routeCategory
+          ? product.category.category === routeCategory
           : category.length > 0
           ? category.includes(product.category?.category)
           : true;
-
+      console.log("product.category", product.category.category);
       const ratingMatch = rating !== null ? product.rating >= rating : true;
-
+      console.log("categoryMatch && ratingMatch", categoryMatch, ratingMatch);
       return categoryMatch && ratingMatch;
     }) || [];
+
+  console.log("filteredData", filteredData);
 
   useEffect(() => {
     if (routeCategory && routeCategory !== "All") {
@@ -50,8 +59,16 @@ const Products = () => {
         })
       : filteredData; // If no products, return as is
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="d-flex justify-content-center mt-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   if (error) return <p>Error: {error}</p>;
+
   return (
     <>
       <div className="row bg-dark-subtle">
@@ -170,18 +187,23 @@ const Products = () => {
                       </p>
                       <p className="card-text">RS. {product.price}</p>
                       <div className="d-grid">
-                        <button
-                          className="btn btn-primary mt-2"
-                          onClick={() =>
-                            handleAddToCart(
-                              "68103fd1e368407f3b0d93ef",
-                              product._id,
-                              count
-                            )
-                          }
-                        >
-                          Add to cart
-                        </button>
+                        {userId ? (
+                          <button
+                            className="btn btn-primary mt-2"
+                            onClick={() =>
+                              handleAddToCart(userId, product._id, count)
+                            }
+                          >
+                            Add to cart
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-primary mt-2"
+                            onClick={handleCartAlert}
+                          >
+                            Add to cart
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>

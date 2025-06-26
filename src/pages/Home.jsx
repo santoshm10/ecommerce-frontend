@@ -12,7 +12,14 @@ const Home = () => {
     navigate(`/products/category/${categoryName}`);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="d-flex justify-content-center mt-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   if (error) return <p>Error: {error}</p>;
 
   return (
@@ -32,7 +39,9 @@ const Home = () => {
                     alt={category.category}
                     className="img-thumbnail"
                   />
-                  <h5 className="card-title text-center mt-2">{category.category}</h5>
+                  <h5 className="card-title text-center mt-2">
+                    {category.category}
+                  </h5>
                 </div>
               </div>
             </div>
@@ -66,7 +75,8 @@ const Home = () => {
                     <div className="mt-5">
                       <h5 className="card-title">Summer Collection</h5>
                       <p className="card-text">
-                        Checkout best summer collection to stay cool this summer.
+                        Checkout best summer collection to stay cool this
+                        summer.
                       </p>
                     </div>
                   </div>
@@ -93,7 +103,8 @@ const Home = () => {
                     <div className="mt-5">
                       <h5 className="card-title">Summer Collection</h5>
                       <p className="card-text">
-                        Checkout best summer collection to stay cool this summer.
+                        Checkout best summer collection to stay cool this
+                        summer.
                       </p>
                     </div>
                   </div>

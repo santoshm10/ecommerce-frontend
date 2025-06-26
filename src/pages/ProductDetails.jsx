@@ -4,13 +4,21 @@ import { useParams } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
 
 const ProductDetails = () => {
-  const { count, reduce, increse, handleAddToCart } = useAppContext();
+  const { count, reduce, increse, handleAddToCart, handleCartAlert, userId } =
+    useAppContext();
   const { productId } = useParams();
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/products"
   );
 
-  if (loading) return <p>Loading product details...</p>;
+  if (loading)
+    return (
+      <div className="d-flex justify-content-center mt-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    );
   if (error) return <p>Error: {error}</p>;
   if (!data || !Array.isArray(data)) return <p>No data found.</p>;
 
@@ -33,18 +41,26 @@ const ProductDetails = () => {
             />
             <div className="d-grid gap-2">
               <button className="btn btn-primary mt-2">Buy Now</button>
-              <button
-                className="btn btn-secondary mt-2"
-                onClick={() =>
-                  handleAddToCart(
-                    "68103fd1e368407f3b0d93ef",
-                    selectedProduct._id,
-                    count
-                  )
-                }
-              >
-                Add To Cart
-              </button>
+
+              <div className="d-grid">
+                {userId ? (
+                  <button
+                    className="btn btn-primary mt-2"
+                    onClick={() =>
+                      handleAddToCart(userId, selectedProduct._id, count)
+                    }
+                  >
+                    Add to cart
+                  </button>
+                ) : (
+                  <button
+                    className="btn btn-primary mt-2"
+                    onClick={handleCartAlert}
+                  >
+                    Add to cart
+                  </button>
+                )}
+              </div>
             </div>
           </div>
 
