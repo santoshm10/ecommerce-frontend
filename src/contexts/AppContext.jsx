@@ -1,8 +1,5 @@
-
 import { createContext, useContext, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-
-
 
 const AppContext = createContext();
 
@@ -11,17 +8,30 @@ export function useAppContext() {
 }
 
 export function AppContextProvider({ children }) {
-  const navigate = useNavigate()
-  const [cartLoading, setCartLoading] = useState(false);
+  const navigate = useNavigate();
+  const [cartLoading, setCartLoading] = useState(false); 
+  const [wishlistLoading, setWishlistLoading] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false);
-  const [cartIconAlert, setCartIconAlert] = useState("")
-  //const [state, setState] = useState(null);
+  const [cartIconAlert, setCartIconAlert] = useState("");
   const [count, setCount] = useState(1);
   const [category, setCategory] = useState([]);
   const [rating, setRating] = useState(null);
   const [sort, setSort] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [localCartItems, setLocalCartItems] = useState([]);
+  console.log("localCartItems: ", localCartItems);
+  const [wishlistItems, setWishlistItem] = useState([]);
+  const [localWishlistItems, setLocalWishlistItems] = useState([]);
+  console.log("localWishlistItems: ", localWishlistItems);
   const [userId, setUserId] = useState("68103fd1e368407f3b0d93ef"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
+  console.log("wishlistItems aapcontext: ", wishlistItems);
+  const [newUserData, setNewUserData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+
+  console.log("newUserData after setnewUserData: ", newUserData);
 
   const reduce = () => {
     setCount((c) => (c > 0 ? c - 1 : c));
@@ -54,8 +64,123 @@ export function AppContextProvider({ children }) {
     setSort(e.target.value);
   };
 
+  //Fetch wishlist bu user id
+  const fetchWishlist = async () => {
+    setWishlistLoading(true); // Set loading to true before fetch
+    try {
+      const response = await fetch(
+        `https://ecommerce-backend-gules-phi.vercel.app/api/wishlist/${userId}`
+      );
+      const wishlistResult = await response.json();
+      console.log("Fetched Wishlist Result:", wishlistResult);
+
+      setWishlistItem(
+        Array.isArray(wishlistResult)
+          ? wishlistResult
+          : wishlistResult.wishlist || []
+      );
+    } catch (error) {
+      console.error("Error fetching wishlist: ", error);
+      setWishlistItem([]); // Ensure it's an array even on error
+    } finally {
+      setWishlistLoading(false); // Set loading to false after fetch (success or error)
+    }
+  };
+
+  // wishlist button: onclick product add or send in wishlist
+  const handleAddToWishlist = async (user, productId, quantity) => {
+    console.log("🛒 handleAddToWishlist →", { user, productId, quantity });
+
+    try {
+      // Check if item already in wishlist
+      const wishlistExistingItem = wishlistItems.find(
+        (item) => item.product._id === productId
+      );
+
+      console.log("🧾 Existing Wishlist Item:", wishlistExistingItem);
+
+      if (wishlistExistingItem) {
+        // If already in wishlist, update quantity
+        await updateWishlistQuantity(
+          productId,
+          quantity + wishlistExistingItem.quantity
+        );
+        alert("Product already in wishlist. Increased quantity.");
+      } else {
+        const response = await fetch(
+          "https://ecommerce-backend-gules-phi.vercel.app/api/wishlist",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user,
+              product: productId,
+              quantity,
+            }),
+          }
+        );
+
+        const result = await response.json();
+
+        if (response.ok) {
+          alert("Product added to wishlist");
+          fetchWishlist(); // Refresh wishlist UI
+        } else {
+          alert(
+            "Failed to add to wishlist: " + (result.error || "Unknown error")
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Add to wishlist error:", error);
+      alert("Something went wrong while adding to wishlist.");
+    }
+  };
+
+  //Update Quantity
+  const updateWishlistQuantity = async (productId, quantity) => {
+    try {
+      const response = await fetch(
+        "https://ecommerce-backend-gules-phi.vercel.app/api/wishlist",
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user: userId, product: productId, quantity }),
+        }
+      );
+
+      if (response.ok) {
+        fetchWishlist();
+      }
+    } catch (error) {
+      console.error("Update quantity error:", error);
+    }
+  };
+
+  //Remove from Cart
+  const removeFromWishlist = async (wishlistItemId) => {
+    try {
+      const response = await fetch(
+        `https://ecommerce-backend-gules-phi.vercel.app/api/wishlist/${wishlistItemId}`,
+        {
+          method: "DELETE",
+        }
+      );
+
+      if (response.ok) {
+        alert("Product remove from wishlist");
+        await fetchWishlist(); // ✅ make sure to await
+      }
+    } catch (error) {
+      console.error("Remove from wishlsit error:", error);
+    }
+  };
+
   //Fetch cart by user ID
   const fetchCart = async () => {
+    setCartLoading(true); // Ensure this is also managed correctly for cart
     try {
       const response = await fetch(
         `https://ecommerce-backend-gules-phi.vercel.app/api/cart/${userId}`
@@ -68,6 +193,8 @@ export function AppContextProvider({ children }) {
     } catch (error) {
       console.error("Error fetching cart:", error);
       setCartItems([]); // fallback
+    } finally {
+      setCartLoading(false); // Set loading to false after fetch
     }
   };
 
@@ -93,10 +220,10 @@ export function AppContextProvider({ children }) {
             body: JSON.stringify({ user, product, quantity }),
           }
         );
-        alert("Product added to cart");
 
         const result = await response.json();
         if (response.ok) {
+          alert("Product added to cart"); // This alert fires before knowing success
           fetchCart(); // Refresh cart
         } else {
           alert("Failed to add to cart: " + result.error);
@@ -108,7 +235,6 @@ export function AppContextProvider({ children }) {
   };
 
   //Update Quantity
-
   const updateCartQuantity = async (productId, quantity) => {
     try {
       const response = await fetch(
@@ -121,7 +247,7 @@ export function AppContextProvider({ children }) {
       );
 
       if (response.ok) {
-        fetchCart();
+        
       }
     } catch (error) {
       console.error("Update quantity error:", error);
@@ -129,7 +255,6 @@ export function AppContextProvider({ children }) {
   };
 
   //Remove from Cart
-
   const removeFromCart = async (cartItemId) => {
     try {
       const response = await fetch(
@@ -156,6 +281,43 @@ export function AppContextProvider({ children }) {
     }
   };
 
+  const handleNewUserInput = (event) => {
+    const { name, value } = event.target;
+    setNewUserData({
+      ...newUserData,
+      [name]: value,
+    });
+  };
+
+
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    const response = await fetch("http://localhost:3001/api/users", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newUserData),
+    });
+    console.log("response: ", response)
+    const result = await response.json();
+    console.log("result: ", result)
+
+
+    if (response.ok) {
+      alert("User registered successfully");
+    } else {
+      alert(result.error || "Registration failed");
+    }
+  } catch (err) {
+    console.error("Error submitting form:", err);
+    alert("Something went wrong");
+  }
+};
+
+
   return (
     <AppContext.Provider
       value={{
@@ -176,13 +338,26 @@ export function AppContextProvider({ children }) {
         removeFromCart,
         userId,
         cartLoading,
+        wishlistLoading, // EXPOSE NEW LOADING STATE
         showUserLogin,
         setShowUserLogin,
         setUserId,
         navigate,
-        cartIconAlert, 
+        cartIconAlert,
         setCartIconAlert,
-        handleCartAlert
+        handleCartAlert,
+        handleAddToWishlist,
+        removeFromWishlist,
+        fetchWishlist,
+        wishlistItems,
+        newUserData,
+        setNewUserData,
+        handleNewUserInput,
+        handleSubmit,
+        localCartItems,
+    setLocalCartItems,
+    localWishlistItems,
+    setLocalWishlistItems
       }}
     >
       {children}

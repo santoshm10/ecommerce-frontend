@@ -6,6 +6,9 @@ const Home = () => {
     "https://ecommerce-backend-gules-phi.vercel.app/api/category"
   );
 
+  console.log(Array.isArray(data), data);
+
+
   const navigate = useNavigate();
 
   const handleCategoryClick = (categoryName) => {

@@ -1,16 +1,14 @@
-import { NavLink, Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
 
 const Nav = () => {
-  const { cartItems, userId, setUserId, setShowUserLogin, navigate, handleCartAlert } =
-    useAppContext();
+  const {
+    userId,
+    handleCartAlert,
+    localCartItems,
+    localWishlistItems,
+  } = useAppContext();
 
-  
-
-  const logout = async () => {
-    setUserId(null);
-    navigate("/");
-  };
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -45,33 +43,12 @@ const Nav = () => {
           </form>
 
           <div className="ms-auto d-flex align-items-center">
-            {!userId ? (
-              <Link to={"/login"}>
-              <button
-                onClick={() => setShowUserLogin(true)}
-                type="button"
-                className="btn btn-secondary me-2"
-              >
-                
-                Login
-              </button>
-              </Link>
-            ) : (
-              <button
-                onClick={logout}
-                type="button"
-                className="btn btn-secondary me-2"
-              >
-                Logout
-              </button>
-            )}
-
             <ul className="navbar-nav gap-3 mb-2 mb-lg-0">
               <li className="nav-item position-relative">
                 <NavLink
                   className="nav-link active"
                   aria-current="page"
-                  to="/cart"
+                  to="/profile" //user profile page
                 >
                   {userId ? <i className="bi bi-person fs-4"></i> : <i></i>}
                 </NavLink>
@@ -85,7 +62,7 @@ const Nav = () => {
                     to="/cart"
                   >
                     <span className="position-absolute top-70 start-100 translate-middle badge rounded-pill bg-danger">
-                      {cartItems.length}
+                      {localCartItems.length}
                     </span>
                     <i className="bi bi-cart3 fs-4"></i>
                   </NavLink>
@@ -95,37 +72,32 @@ const Nav = () => {
                     aria-current="page"
                     onClick={handleCartAlert}
                   >
-                    <i className="bi bi-cart3 fs-4" ></i>
-                    
+                    <i className="bi bi-cart3 fs-4"></i>
                   </div>
-                  
                 )}
-                {/*<NavLink
-                  className="nav-link active"
-                  aria-current="page"
-                  to="/cart"
-                >
-                  <span className="position-absolute top-70 start-100 translate-middle badge rounded-pill bg-danger">
-                    {userId
-                      ? Array.isArray(cartItems)
-                        ? cartItems.length
-                        : 0
-                      : null}
-                  </span>
-                  <i className="bi bi-cart3 fs-4"></i>
-                </NavLink>
-                */}
               </li>
 
-              <li className="nav-item position-relative ">
-                <NavLink
-                  className="nav-link active"
-                  aria-current="page"
-                  to="/wishlist"
-                >
-                  <span className="position-absolute top-70 start-100 translate-middle badge rounded-pill bg-danger"></span>
-                  <i className="bi bi-heart fs-4"></i>
-                </NavLink>
+              <li className="nav-item position-relative">
+                {userId ? (
+                  <NavLink
+                    className="nav-link active"
+                    aria-current="page"
+                    to="/wishlist"
+                  >
+                    <span className="position-absolute top-70 start-100 translate-middle badge rounded-pill bg-danger">
+                      {localWishlistItems.length}
+                    </span>
+                    <i className="bi bi-heart fs-4"></i>
+                  </NavLink>
+                ) : (
+                  <div
+                    className="nav-link active"
+                    aria-current="page"
+                    onClick={handleCartAlert}
+                  >
+                    <i className="bi bi-heart fs-4"></i>
+                  </div>
+                )}
               </li>
             </ul>
           </div>
