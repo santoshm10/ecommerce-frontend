@@ -6,8 +6,7 @@ const Home = () => {
     "https://ecommerce-backend-gules-phi.vercel.app/api/category"
   );
 
-  console.log(Array.isArray(data), data);
-
+  console.log("home page data checking", Array.isArray(data), data);
 
   const navigate = useNavigate();
 
@@ -29,7 +28,12 @@ const Home = () => {
     <>
       <div className="container py-4">
         <div className="row">
-          {data?.map((category) => (
+          {Array.isArray(data) && data.length > 0 ? (
+            data.map((item) => <div key={item._id}>{item.category}</div>)
+          ) : (
+            <p>Loading categories...</p>
+          )}
+          {/* {data?.map((category) => (
             <div className="col" key={category._id}>
               <div
                 className="card text-decoration-none text-dark"
@@ -48,7 +52,7 @@ const Home = () => {
                 </div>
               </div>
             </div>
-          ))}
+          ))} */}
         </div>
 
         <div className="row">

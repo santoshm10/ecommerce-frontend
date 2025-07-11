@@ -9,7 +9,7 @@ export function useAppContext() {
 
 export function AppContextProvider({ children }) {
   const navigate = useNavigate();
-  const [cartLoading, setCartLoading] = useState(false); 
+  const [cartLoading, setCartLoading] = useState(false);
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [cartIconAlert, setCartIconAlert] = useState("");
@@ -18,12 +18,13 @@ export function AppContextProvider({ children }) {
   const [rating, setRating] = useState(null);
   const [sort, setSort] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  console.log("cartItems: ", cartItems);
   const [localCartItems, setLocalCartItems] = useState([]);
   console.log("localCartItems: ", localCartItems);
   const [wishlistItems, setWishlistItem] = useState([]);
   const [localWishlistItems, setLocalWishlistItems] = useState([]);
   console.log("localWishlistItems: ", localWishlistItems);
-  const [userId, setUserId] = useState("68103fd1e368407f3b0d93ef"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
+  const [userId, setUserId] = useState("6825cc70ffc5d2746de48e9c"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
   console.log("wishlistItems aapcontext: ", wishlistItems);
   const [newUserData, setNewUserData] = useState({
     name: "",
@@ -199,7 +200,48 @@ export function AppContextProvider({ children }) {
   };
 
   // Add to Cart (with check for existing product)
+
   const handleAddToCart = async (user, product, quantity) => {
+  console.log("user, product, quantity", user, product, quantity);
+
+  try {
+    // ✅ Refresh cart first to get updated backend state
+    await fetchCart();
+
+    const latestCart = Array.isArray(cartItems) ? cartItems : [];
+
+    const existingItem = latestCart.find(
+      (item) => item.product._id === product
+    );
+
+    if (existingItem) {
+      await updateCartQuantity(product, existingItem.quantity + quantity);
+      alert("Product already in cart");
+    } else {
+      const response = await fetch(
+        "https://ecommerce-backend-gules-phi.vercel.app/api/cart",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user, product, quantity }),
+        }
+      );
+
+      const result = await response.json();
+      if (response.ok) {
+        alert("Product added to cart");
+        await fetchCart();
+      } else {
+        alert("Failed to add to cart: " + result.error);
+      }
+    }
+  } catch (error) {
+    console.error("Add to cart error:", error);
+  }
+};
+
+
+  /* const handleAddToCart = async (user, product, quantity) => {
     console.log("user, product, quantity", user, product, quantity);
     try {
       const existingItem = cartItems.find(
@@ -232,7 +274,7 @@ export function AppContextProvider({ children }) {
     } catch (error) {
       console.error("Add to cart error:", error);
     }
-  };
+  }; */
 
   //Update Quantity
   const updateCartQuantity = async (productId, quantity) => {
@@ -247,7 +289,6 @@ export function AppContextProvider({ children }) {
       );
 
       if (response.ok) {
-        
       }
     } catch (error) {
       console.error("Update quantity error:", error);
@@ -289,34 +330,31 @@ export function AppContextProvider({ children }) {
     });
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:3001/api/users", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(newUserData),
+      });
+      console.log("response: ", response);
+      const result = await response.json();
+      console.log("result: ", result);
 
-  try {
-    const response = await fetch("http://localhost:3001/api/users", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(newUserData),
-    });
-    console.log("response: ", response)
-    const result = await response.json();
-    console.log("result: ", result)
-
-
-    if (response.ok) {
-      alert("User registered successfully");
-    } else {
-      alert(result.error || "Registration failed");
+      if (response.ok) {
+        alert("User registered successfully");
+      } else {
+        alert(result.error || "Registration failed");
+      }
+    } catch (err) {
+      console.error("Error submitting form:", err);
+      alert("Something went wrong");
     }
-  } catch (err) {
-    console.error("Error submitting form:", err);
-    alert("Something went wrong");
-  }
-};
-
+  };
 
   return (
     <AppContext.Provider
@@ -355,9 +393,10 @@ export function AppContextProvider({ children }) {
         handleNewUserInput,
         handleSubmit,
         localCartItems,
-    setLocalCartItems,
-    localWishlistItems,
-    setLocalWishlistItems
+        setLocalCartItems,
+        localWishlistItems,
+        setLocalWishlistItems,
+       
       }}
     >
       {children}

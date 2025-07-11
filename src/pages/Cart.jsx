@@ -13,7 +13,8 @@ function Cart() {
     handleAddToWishlist,
     localCartItems,
     setLocalCartItems,
-    userId
+    userId,
+    
   } = useAppContext();
 
    const navigate = useNavigate();
@@ -57,8 +58,10 @@ function Cart() {
   // Handle Move to Wishlist
   const moveToWishlist = async (item) => {
     setLocalCartItems((prev) => prev.filter((i) => i._id !== item._id));
+   
     await handleAddToWishlist(item.user, item.product._id, item.quantity);
     await removeFromCart(item._id);
+   
   };
 
   // Calculations
@@ -86,7 +89,7 @@ function Cart() {
     : 0;
 
   const deliveryCharges = Array.isArray(localCartItems)
-    ? localCartItems.some((item) => item.product.isFreeDelivery === false)
+    ? localCartItems.some((item) => item.product?.isFreeDelivery === false)
       ? 400
       : 0
     : 0;

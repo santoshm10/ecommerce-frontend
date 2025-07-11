@@ -1,48 +1,72 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAppContext } from "../contexts/AppContext";
 import { useNavigate } from "react-router-dom";
+import useFetch from "../useFetch";
 
 const Avatar = () => {
-  const {userId} = useAppContext();
+  const { userId } = useAppContext();
+  const [localAvatar, setLocalAvatar] = useState({});
 
-   const navigate = useNavigate();
-  
-     const handleAddNewAddress = () => {
-      navigate(`/profile/${userId}/address`);
-    };
-  
+  const { data } = useFetch(
+    `https://ecommerce-backend-gules-phi.vercel.app/api/users/${userId}`
+  );
+
+  console.log("user data by user iD: ", data);
+  console.log("user localAvatar by user iD: ", localAvatar);
+
+  // Sync local state with global Avatar
+  useEffect(() => {
+    if (data && typeof data === "object") {
+      setLocalAvatar(data);
+    }
+  }, [data]);
+
+  const navigate = useNavigate();
+
+  const handleAddNewAddress = () => {
+    navigate(`/profile/${userId}/address`);
+  };
+
   return (
     <div className="container p-4">
       <h2>Avatar</h2>
-      <div className="card p-3">
-        <div className="row">
-          <div className="col-md-4 p-3">
-            <img
-              className="img-fluid rounded"
-              src="https://img.freepik.com/premium-photo/happy-man-ai-generated-portrait-user-profile_1119669-1.jpg?w=826"
-              alt=""
-            />
-          </div>
+      {localAvatar && localAvatar.name ? (
+        <div className="card p-3">
+          <div className="row">
+            <div className="col-md-4 p-3">
+              <img
+                className="img-fluid rounded"
+                src={`${localAvatar.userAvatarUrl}?w=826`}
+                alt={`${localAvatar.name}`}
+              />
+            </div>
 
-          <div className="col-md-8 p-3 fs-5">
-            <h2 className="mb-5">Ramakant Shrivastav</h2>
-            <hr />
-            <p>
-              <strong>Email:</strong> ramakant@gmail.com
-            </p>
-            <p>
-              <strong>Phone:</strong> 1234567890
-            </p>
-            <span>
+            <div className="col-md-8 p-3 fs-5">
+              <h2 className="mb-5">{localAvatar.name}</h2>
+              <hr />
               <p>
-                <strong>Address:</strong> Room No. 206, Srinivas Apartment, Near
-                Balaji Temple, Pune.
+                <strong>Email:</strong> {localAvatar.email}
               </p>
-              <button className="btn btn-primary" onClick={handleAddNewAddress}>Add New Address</button>
-            </span>
+              <p>
+                <strong>Phone:</strong> {localAvatar.phoneNumber}
+              </p>
+              <span>
+                <p>
+                  <strong>Address:</strong> {localAvatar.address[0]}
+                </p>
+                <button
+                  className="btn btn-primary"
+                  onClick={handleAddNewAddress}
+                >
+                  Add New Address
+                </button>
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      ) : (
+        <p className="text-muted mt-3">No user found.</p>
+      )}
 
       <div className="">
         <h2 className="py-3">Order History</h2>
