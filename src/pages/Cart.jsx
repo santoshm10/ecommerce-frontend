@@ -14,6 +14,7 @@ function Cart() {
     localCartItems,
     setLocalCartItems,
     userId,
+    deliveryAddres
     
   } = useAppContext();
 
@@ -182,18 +183,10 @@ function Cart() {
                 <h3 className="card-title mb-3">Delivery Address</h3>
                 <hr />
 
-                <label className="mb-3">
-                  <input
-                    type="radio"
-                    name="address"
-                    id="defaultAddress"
-                    className="me-2"
-                  />
-                  Default Address
-                </label>
+                <p>{deliveryAddres}</p>
 
                 <div className="d-flex gap-3">
-                  <button className="btn btn-primary">Choose Address</button>
+                  
                   <button className="btn btn-primary" onClick={handleAddNewAddress}>Add New Address</button>
                 </div>
               </div>

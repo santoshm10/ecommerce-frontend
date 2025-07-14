@@ -7,7 +7,7 @@ const Avatar = () => {
   const { userId } = useAppContext();
   const [localAvatar, setLocalAvatar] = useState({});
 
-  const { data } = useFetch(
+  const { data, loading } = useFetch(
     `https://ecommerce-backend-gules-phi.vercel.app/api/users/${userId}`
   );
 
@@ -29,8 +29,9 @@ const Avatar = () => {
 
   return (
     <div className="container p-4">
-      <h2>Avatar</h2>
-      {localAvatar && localAvatar.name ? (
+      {loading ? (
+        <p className="text-muted">Loading user info...</p>
+      ) : localAvatar && localAvatar.name ? (
         <div className="card p-3">
           <div className="row">
             <div className="col-md-4 p-3">

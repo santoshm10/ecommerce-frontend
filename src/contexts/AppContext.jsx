@@ -24,8 +24,9 @@ export function AppContextProvider({ children }) {
   const [wishlistItems, setWishlistItem] = useState([]);
   const [localWishlistItems, setLocalWishlistItems] = useState([]);
   console.log("localWishlistItems: ", localWishlistItems);
-  const [userId, setUserId] = useState("6825cc70ffc5d2746de48e9c"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
+  const [userId, setUserId] = useState("68103fd1e368407f3b0d93ef"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
   console.log("wishlistItems aapcontext: ", wishlistItems);
+  const [deliveryAddres, setDeliveryAddress] = useState("");
   const [newUserData, setNewUserData] = useState({
     name: "",
     email: "",
@@ -356,6 +357,14 @@ export function AppContextProvider({ children }) {
     }
   };
 
+  const handleDeliveryAddress = (event) => {
+      const selectedDeliveryAddress = event.target.value;
+      setDeliveryAddress(selectedDeliveryAddress);
+      navigate(`/cart`)
+    };
+  
+    console.log("deliveryAddres: ", deliveryAddres);
+
   return (
     <AppContext.Provider
       value={{
@@ -396,7 +405,9 @@ export function AppContextProvider({ children }) {
         setLocalCartItems,
         localWishlistItems,
         setLocalWishlistItems,
-       
+       deliveryAddres, 
+       setDeliveryAddress,
+       handleDeliveryAddress
       }}
     >
       {children}
