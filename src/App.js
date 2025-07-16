@@ -39,6 +39,8 @@ function App() {
 
 export default App;
 */
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
@@ -67,6 +69,7 @@ function App() {
   return (
     <Router> 
       <AppContextProvider> 
+        <ToastContainer position="top-right" autoClose={3000} />
         <Nav />
 
         <Routes>

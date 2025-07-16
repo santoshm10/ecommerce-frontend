@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAppContext } from "../contexts/AppContext";
 import { useNavigate } from "react-router-dom";
 import useFetch from "../useFetch";
+import Orders from "../components/Orders";
 
 const Avatar = () => {
   const { userId } = useAppContext();
@@ -69,36 +70,8 @@ const Avatar = () => {
         <p className="text-muted mt-3">No user found.</p>
       )}
 
-      <div className="">
-        <h2 className="py-3">Order History</h2>
-        <div class="card">
-          <div class="card-header">
-            <strong>Status: </strong>Delivered <small>Date: 09-07-2025</small>
-          </div>
-          <div class="card-body">
-            <div class="row g-0">
-              <div class="col-md-3">
-                <img
-                  src="https://www.pngall.com/wp-content/uploads/2016/05/Jacket-PNG.png"
-                  class=" img-fluid rounded mx-auto d-block w-50"
-                  alt="..."
-                />
-              </div>
-              <div class="col-md-9">
-                <div class="card-body">
-                  <h5 class="card-title">Card title</h5>
-                  <p class="card-text">
-                    This is a wider card with supporting text below as a natural
-                    lead-in to additional content. This content is a little bit
-                    longer.
-                  </p>
-                  <button class="btn btn-primary">View Item</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+        <Orders/>
+      
     </div>
   );
 };

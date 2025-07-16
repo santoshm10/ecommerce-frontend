@@ -6,7 +6,6 @@ import { useAppContext } from "../contexts/AppContext";
 
 const Products = () => {
   const { category: routeCategory } = useParams();
-  console.log("routeCategory", routeCategory);
 
   const {
     category,
@@ -20,14 +19,17 @@ const Products = () => {
     count,
     userId,
     handleCartAlert,
+    priceRange,
+    priceFilter,
+    searchQuery
   } = useAppContext();
 
-  console.log("userId", userId);
+
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/products"
   );
 
-  console.log("data", data);
+  
   const filteredData =
     data?.filter((product) => {
       const categoryMatch =
@@ -35,21 +37,17 @@ const Products = () => {
           ? product.category.category === routeCategory
           : category.length > 0
           ? category.includes(product.category?.category)
-          : true; 
+          : true;
 
-      /* const categoryMatch =
-        routeCategory && routeCategory !== "All"
-          ? product.category === routeCategory
-          : category.length > 0
-          ? category.includes(product.category)
-          : true; */
-      console.log("product.category", product.category);
       const ratingMatch = rating !== null ? product.rating >= rating : true;
-      console.log("categoryMatch && ratingMatch", categoryMatch, ratingMatch);
-      return categoryMatch && ratingMatch;
+
+      const priceMatch = product.price <= priceRange.max;
+
+      const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+
+      return categoryMatch && ratingMatch && priceMatch && searchMatch;
     }) || [];
 
-  console.log("filteredData", filteredData);
 
   useEffect(() => {
     if (routeCategory && routeCategory !== "All") {
@@ -60,11 +58,11 @@ const Products = () => {
   const sortedData =
     filteredData.length > 0
       ? [...filteredData].sort((a, b) => {
-          if (sort === "ascending") return a.price - b.price; // Low to High
-          if (sort === "descending") return b.price - a.price; // High to Low
-          return 0; // Default
+          if (sort === "ascending") return a.price - b.price; 
+          if (sort === "descending") return b.price - a.price; 
+          return 0; 
         })
-      : filteredData; // If no products, return as is
+      : filteredData;
 
   if (loading)
     return (
@@ -92,6 +90,23 @@ const Products = () => {
                 </button>
               </div>
               <div>
+                <p>
+                  <strong>Price Range</strong>
+                </p>
+                <label htmlFor="priceRange" className="form-label">
+                  Up to ₹{priceRange.max}
+                </label>
+                <input
+                  type="range"
+                  className="form-range"
+                  id="priceRange"
+                  name="max"
+                  min="0"
+                  max="10000"
+                  step="100"
+                  value={priceRange.max}
+                  onChange={priceFilter}
+                />
                 <p>
                   <strong>Category</strong>
                 </p>

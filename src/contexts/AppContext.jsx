@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const AppContext = createContext();
 
@@ -17,23 +18,19 @@ export function AppContextProvider({ children }) {
   const [category, setCategory] = useState([]);
   const [rating, setRating] = useState(null);
   const [sort, setSort] = useState(null);
+  const [priceRange, setPriceRange] = useState({ max: 10000 });
+  const [searchQuery, setSearchQuery] = useState("");
   const [cartItems, setCartItems] = useState([]);
-  console.log("cartItems: ", cartItems);
   const [localCartItems, setLocalCartItems] = useState([]);
-  console.log("localCartItems: ", localCartItems);
   const [wishlistItems, setWishlistItem] = useState([]);
   const [localWishlistItems, setLocalWishlistItems] = useState([]);
-  console.log("localWishlistItems: ", localWishlistItems);
   const [userId, setUserId] = useState("68103fd1e368407f3b0d93ef"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
-  console.log("wishlistItems aapcontext: ", wishlistItems);
   const [deliveryAddres, setDeliveryAddress] = useState("");
   const [newUserData, setNewUserData] = useState({
     name: "",
     email: "",
     password: "",
   });
-
-  console.log("newUserData after setnewUserData: ", newUserData);
 
   const reduce = () => {
     setCount((c) => (c > 0 ? c - 1 : c));
@@ -66,9 +63,22 @@ export function AppContextProvider({ children }) {
     setSort(e.target.value);
   };
 
-  //Fetch wishlist bu user id
+  const priceFilter = (e) => {
+    const { name, value } = e.target;
+    setPriceRange((prev) => ({ ...prev, [name]: Number(value) }));
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
+  };
+
+  //Fetch wishlist by user id
   const fetchWishlist = async () => {
-    setWishlistLoading(true); // Set loading to true before fetch
+    setWishlistLoading(true);
     try {
       const response = await fetch(
         `https://ecommerce-backend-gules-phi.vercel.app/api/wishlist/${userId}`
@@ -83,15 +93,15 @@ export function AppContextProvider({ children }) {
       );
     } catch (error) {
       console.error("Error fetching wishlist: ", error);
-      setWishlistItem([]); // Ensure it's an array even on error
+      setWishlistItem([]);
     } finally {
-      setWishlistLoading(false); // Set loading to false after fetch (success or error)
+      setWishlistLoading(false);
     }
   };
 
   // wishlist button: onclick product add or send in wishlist
   const handleAddToWishlist = async (user, productId, quantity) => {
-    console.log("🛒 handleAddToWishlist →", { user, productId, quantity });
+    console.log("handleAddToWishlist →", { user, productId, quantity });
 
     try {
       // Check if item already in wishlist
@@ -99,15 +109,13 @@ export function AppContextProvider({ children }) {
         (item) => item.product._id === productId
       );
 
-      console.log("🧾 Existing Wishlist Item:", wishlistExistingItem);
-
       if (wishlistExistingItem) {
         // If already in wishlist, update quantity
         await updateWishlistQuantity(
           productId,
           quantity + wishlistExistingItem.quantity
         );
-        alert("Product already in wishlist. Increased quantity.");
+        toast.success("Product already in wishlist. Increased quantity.");
       } else {
         const response = await fetch(
           "https://ecommerce-backend-gules-phi.vercel.app/api/wishlist",
@@ -127,17 +135,17 @@ export function AppContextProvider({ children }) {
         const result = await response.json();
 
         if (response.ok) {
-          alert("Product added to wishlist");
+          toast.success("Product added to wishlist");
           fetchWishlist(); // Refresh wishlist UI
         } else {
-          alert(
+          toast.error(
             "Failed to add to wishlist: " + (result.error || "Unknown error")
           );
         }
       }
     } catch (error) {
       console.error("Add to wishlist error:", error);
-      alert("Something went wrong while adding to wishlist.");
+      toast.error("Something went wrong while adding to wishlist.");
     }
   };
 
@@ -161,7 +169,7 @@ export function AppContextProvider({ children }) {
     }
   };
 
-  //Remove from Cart
+  //Remove from wishliat
   const removeFromWishlist = async (wishlistItemId) => {
     try {
       const response = await fetch(
@@ -172,8 +180,8 @@ export function AppContextProvider({ children }) {
       );
 
       if (response.ok) {
-        alert("Product remove from wishlist");
-        await fetchWishlist(); // ✅ make sure to await
+        toast.success("Product remove from wishlist");
+        await fetchWishlist();
       }
     } catch (error) {
       console.error("Remove from wishlsit error:", error);
@@ -182,13 +190,12 @@ export function AppContextProvider({ children }) {
 
   //Fetch cart by user ID
   const fetchCart = async () => {
-    setCartLoading(true); // Ensure this is also managed correctly for cart
+    setCartLoading(true);
     try {
       const response = await fetch(
         `https://ecommerce-backend-gules-phi.vercel.app/api/cart/${userId}`
       );
       const result = await response.json();
-      console.log("Fetched Cart Result:", result); // ✅ check what's returned
 
       // ✅ Force it to always be an array
       setCartItems(Array.isArray(result) ? result : result.cart || []);
@@ -196,64 +203,28 @@ export function AppContextProvider({ children }) {
       console.error("Error fetching cart:", error);
       setCartItems([]); // fallback
     } finally {
-      setCartLoading(false); // Set loading to false after fetch
+      setCartLoading(false);
     }
   };
 
   // Add to Cart (with check for existing product)
 
   const handleAddToCart = async (user, product, quantity) => {
-  console.log("user, product, quantity", user, product, quantity);
-
-  try {
-    // ✅ Refresh cart first to get updated backend state
-    await fetchCart();
-
-    const latestCart = Array.isArray(cartItems) ? cartItems : [];
-
-    const existingItem = latestCart.find(
-      (item) => item.product._id === product
-    );
-
-    if (existingItem) {
-      await updateCartQuantity(product, existingItem.quantity + quantity);
-      alert("Product already in cart");
-    } else {
-      const response = await fetch(
-        "https://ecommerce-backend-gules-phi.vercel.app/api/cart",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ user, product, quantity }),
-        }
-      );
-
-      const result = await response.json();
-      if (response.ok) {
-        alert("Product added to cart");
-        await fetchCart();
-      } else {
-        alert("Failed to add to cart: " + result.error);
-      }
-    }
-  } catch (error) {
-    console.error("Add to cart error:", error);
-  }
-};
-
-
-  /* const handleAddToCart = async (user, product, quantity) => {
     console.log("user, product, quantity", user, product, quantity);
+
     try {
-      const existingItem = cartItems.find(
+      // ✅ Refresh cart first to get updated backend state
+      await fetchCart();
+
+      const latestCart = Array.isArray(cartItems) ? cartItems : [];
+
+      const existingItem = latestCart.find(
         (item) => item.product._id === product
       );
 
-      console.log("existingItem", existingItem);
       if (existingItem) {
-        // If product exists, increase quantity
         await updateCartQuantity(product, existingItem.quantity + quantity);
-        alert("Product alredy in cart");
+        toast.success("Product already in cart! Quantity Increased");
       } else {
         const response = await fetch(
           "https://ecommerce-backend-gules-phi.vercel.app/api/cart",
@@ -266,16 +237,16 @@ export function AppContextProvider({ children }) {
 
         const result = await response.json();
         if (response.ok) {
-          alert("Product added to cart"); // This alert fires before knowing success
-          fetchCart(); // Refresh cart
+          toast.success("Product added to cart");
+          await fetchCart();
         } else {
-          alert("Failed to add to cart: " + result.error);
+          toast.error("Failed to add to cart: " + result.error);
         }
       }
     } catch (error) {
       console.error("Add to cart error:", error);
     }
-  }; */
+  };
 
   //Update Quantity
   const updateCartQuantity = async (productId, quantity) => {
@@ -306,9 +277,9 @@ export function AppContextProvider({ children }) {
         }
       );
 
-      alert("Product remove from cart");
+      toast.success("Product remove from cart");
       if (response.ok) {
-        await fetchCart(); // ✅ make sure to await
+        await fetchCart();
       }
     } catch (error) {
       console.error("Remove from cart error:", error);
@@ -323,47 +294,87 @@ export function AppContextProvider({ children }) {
     }
   };
 
-  const handleNewUserInput = (event) => {
-    const { name, value } = event.target;
-    setNewUserData({
-      ...newUserData,
-      [name]: value,
-    });
+  const handleDeliveryAddress = (event) => {
+    const selectedDeliveryAddress = event.target.value;
+    setDeliveryAddress(selectedDeliveryAddress);
+    navigate(`/cart`);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // POST or sending data from cart to order and DELETE all cart items after placing order
+  const handlePlaceOrder = async (userId, cartItems, deliveryAddress) => {
+    // 0️⃣ Basic validations
+    if (!Array.isArray(cartItems) || cartItems.length === 0) {
+      return alert("Cart is empty. Cannot place order.");
+    }
+
+    if (!userId) {
+      return alert("Please login.");
+    }
+
+    if (!deliveryAddress) {
+      return alert("Delivery address missing. Please Selecte Address.");
+    }
 
     try {
-      const response = await fetch("http://localhost:3001/api/users", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(newUserData),
-      });
-      console.log("response: ", response);
-      const result = await response.json();
-      console.log("result: ", result);
+      // 1️⃣ Build payload
+      const orderItem = cartItems.map((item) => ({
+        product: item.product._id,
+        quantity: item.quantity,
+      }));
 
-      if (response.ok) {
-        alert("User registered successfully");
-      } else {
-        alert(result.error || "Registration failed");
+      const orderPrice = cartItems.reduce(
+        (sum, item) => sum + item.product.price * item.quantity,
+        0
+      );
+
+      // 2️⃣ POST to create order
+      const orderRes = await fetch(
+        "https://ecommerce-backend-gules-phi.vercel.app/api/order/",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer: userId,
+            orderItem,
+            orderPrice,
+            deliveryAdress: deliveryAddress,
+          }),
+        }
+      );
+
+      const orderResult = await orderRes.json();
+
+      if (!orderRes.ok) {
+        return alert(
+          "Failed to place order: " + (orderResult.error || "Unknown")
+        );
       }
+
+      toast.success("Order placed successfully!");
+
+      // 3️⃣ DELETE all cart items for this user
+      const deleteRes = await fetch(
+        `https://ecommerce-backend-gules-phi.vercel.app/api/cart/user/${userId}`,
+        { method: "DELETE" }
+      );
+      const deleteResult = await deleteRes.json();
+
+      if (!deleteRes.ok) {
+        return alert(
+          "Order placed but failed to clear cart: " +
+            (deleteResult.error || "Unknown")
+        );
+      }
+
+      // 4️⃣ Clear frontend state & re‑fetch
+      setCartItems([]);
+      setLocalCartItems([]);
+      await fetchCart();
     } catch (err) {
-      console.error("Error submitting form:", err);
-      alert("Something went wrong");
+      console.error("Error in handlePlaceOrder:", err);
+      alert("Something went wrong while placing the order.");
     }
   };
-
-  const handleDeliveryAddress = (event) => {
-      const selectedDeliveryAddress = event.target.value;
-      setDeliveryAddress(selectedDeliveryAddress);
-      navigate(`/cart`)
-    };
-  
-    console.log("deliveryAddres: ", deliveryAddres);
 
   return (
     <AppContext.Provider
@@ -385,7 +396,7 @@ export function AppContextProvider({ children }) {
         removeFromCart,
         userId,
         cartLoading,
-        wishlistLoading, // EXPOSE NEW LOADING STATE
+        wishlistLoading, 
         showUserLogin,
         setShowUserLogin,
         setUserId,
@@ -399,15 +410,19 @@ export function AppContextProvider({ children }) {
         wishlistItems,
         newUserData,
         setNewUserData,
-        handleNewUserInput,
-        handleSubmit,
         localCartItems,
         setLocalCartItems,
         localWishlistItems,
         setLocalWishlistItems,
-       deliveryAddres, 
-       setDeliveryAddress,
-       handleDeliveryAddress
+        deliveryAddres,
+        setDeliveryAddress,
+        handleDeliveryAddress,
+        handlePlaceOrder,
+        priceRange,
+        priceFilter,
+        searchQuery,
+        handleSearchChange,
+        clearSearch,
       }}
     >
       {children}

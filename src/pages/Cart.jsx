@@ -14,7 +14,8 @@ function Cart() {
     localCartItems,
     setLocalCartItems,
     userId,
-    deliveryAddres
+    deliveryAddres,
+    handlePlaceOrder
     
   } = useAppContext();
 
@@ -23,6 +24,11 @@ function Cart() {
    const handleAddNewAddress = () => {
     navigate(`/profile/${userId}/address`);
   };
+
+  const handlePlaceOrderAndRedirect = ()=> {
+    handlePlaceOrder(userId, cartItems, deliveryAddres)
+    navigate("/profile")
+  }
 
   // Fetch cart initially
   useEffect(() => {
@@ -208,7 +214,7 @@ function Cart() {
               </p>
               <hr />
               <p>You will save ₹{totalDiscount} on this order</p>
-              <button className="btn btn-primary">PLACE ORDER</button>
+              <button className="btn btn-primary" onClick={handlePlaceOrderAndRedirect}>PLACE ORDER</button>
             </div>
           </div>
         </div>

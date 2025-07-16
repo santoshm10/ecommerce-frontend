@@ -6,8 +6,6 @@ const Home = () => {
     "https://ecommerce-backend-gules-phi.vercel.app/api/category"
   );
 
-  console.log("home page data checking", Array.isArray(data), data);
-
   const navigate = useNavigate();
 
   const handleCategoryClick = (categoryName) => {
@@ -29,30 +27,29 @@ const Home = () => {
       <div className="container py-4">
         <div className="row">
           {Array.isArray(data) && data.length > 0 ? (
-            data.map((item) => <div key={item._id}>{item.category}</div>)
-          ) : (
-            <p>Loading categories...</p>
-          )}
-          {/* {data?.map((category) => (
-            <div className="col" key={category._id}>
+            data?.map((item) => (
+            <div className="col" key={item._id}>
               <div
                 className="card text-decoration-none text-dark"
-                onClick={() => handleCategoryClick(category.category)}
+                onClick={() => handleCategoryClick(item.category)}
                 style={{ cursor: "pointer" }}
               >
                 <div className="card-body">
                   <img
                     src="https://www.pngall.com/wp-content/uploads/2016/05/Jacket-PNG.png"
-                    alt={category.category}
+                    alt={item.category}
                     className="img-thumbnail"
                   />
                   <h5 className="card-title text-center mt-2">
-                    {category.category}
+                    {item.category}
                   </h5>
                 </div>
               </div>
             </div>
-          ))} */}
+              ))
+          ) : (
+            <p>Loading categories...</p>
+          )}
         </div>
 
         <div className="row">

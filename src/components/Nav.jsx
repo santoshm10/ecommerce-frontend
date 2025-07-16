@@ -7,8 +7,9 @@ const Nav = () => {
     handleCartAlert,
     localCartItems,
     localWishlistItems,
+    searchQuery,
+    handleSearchChange,
   } = useAppContext();
-
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -30,12 +31,18 @@ const Nav = () => {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <form className="d-flex ms-auto" role="search">
+          <form
+            className="d-flex ms-auto"
+            role="search"
+            onSubmit={(e) => e.preventDefault()}
+          >
             <input
               className="form-control me-2"
               type="search"
               placeholder="Search"
               aria-label="Search"
+              value={searchQuery}
+              onChange={handleSearchChange}
             />
             <button className="btn btn-outline-success" type="submit">
               Search
