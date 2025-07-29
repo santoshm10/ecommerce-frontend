@@ -3,9 +3,11 @@ import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
+import { useNavigate } from "react-router-dom";
 
 const Products = () => {
   const { category: routeCategory } = useParams();
+  const navigate = useNavigate();
 
   const {
     category,
@@ -18,24 +20,57 @@ const Products = () => {
     handleAddToCart,
     count,
     userId,
-    handleCartAlert,
     priceRange,
     priceFilter,
-    searchQuery
+    searchQuery,
+    handleAddToWishlist,
+    cartItems,
+    wishlistItems,
+    fetchCart,
+    fetchWishlist
   } = useAppContext();
-
 
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/products"
   );
 
-  
+  const handleGoToCart = () => {
+    navigate("/cart");
+  };
+
+  const handleGoToWishlist = () => {
+    navigate("/wishlist");
+  };
+
+  const onAddToCart = async (product) => {
+    const alreadyInCart = cartItems?.some(
+      (item) =>
+        item?.product?._id === product._id ||
+        item?._id === product._id ||
+        item?.product === product._id
+    );
+    if (!alreadyInCart) {
+      await handleAddToCart(userId, product, count);
+      fetchCart();
+    }
+  };
+
+  const onMoveToWishlist = async (product) => {
+    const alreadyInWishlist = wishlistItems.some(
+      (item) => item.product._id === product._id
+    );
+    if (!alreadyInWishlist) {
+      await handleAddToWishlist(userId, product._id, product.quantity);
+      fetchWishlist()
+    }
+  };
+
+  const productList = Array.isArray(data) ? data : [];
+
   const filteredData =
-    data?.filter((product) => {
+    productList.filter((product) => {
       const categoryMatch =
-        routeCategory && routeCategory !== "All"
-          ? product.category.category === routeCategory
-          : category.length > 0
+        category.length > 0
           ? category.includes(product.category?.category)
           : true;
 
@@ -43,11 +78,12 @@ const Products = () => {
 
       const priceMatch = product.price <= priceRange.max;
 
-      const searchMatch = product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      const searchMatch = product.name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
       return categoryMatch && ratingMatch && priceMatch && searchMatch;
     }) || [];
-
 
   useEffect(() => {
     if (routeCategory && routeCategory !== "All") {
@@ -58,11 +94,17 @@ const Products = () => {
   const sortedData =
     filteredData.length > 0
       ? [...filteredData].sort((a, b) => {
-          if (sort === "ascending") return a.price - b.price; 
-          if (sort === "descending") return b.price - a.price; 
-          return 0; 
+          if (sort === "ascending") return a.price - b.price;
+          if (sort === "descending") return b.price - a.price;
+          return 0;
         })
       : filteredData;
+
+  // Fetch cart initially
+  useEffect(() => {
+    fetchCart();
+    fetchWishlist();
+  }, []);
 
   if (loading)
     return (
@@ -210,22 +252,51 @@ const Products = () => {
                             <strong>{product.name}</strong>
                           </p>
                           <p className="card-text">RS. {product.price}</p>
+
                           <div className="d-grid">
-                            {userId ? (
+                            {userId &&
+                            cartItems?.some(
+                              (item) =>
+                                item?.product?._id === product._id ||
+                                item?._id === product._id ||
+                                item?.product === product._id
+                            ) ? (
                               <button
-                                className="btn btn-primary mt-2"
-                                onClick={() =>
-                                  handleAddToCart(userId, product._id, count)
-                                }
+                                className="btn btn-outline-success mt-2"
+                                onClick={handleGoToCart}
                               >
-                                Add to cart
+                                Go To Cart
                               </button>
                             ) : (
                               <button
                                 className="btn btn-primary mt-2"
-                                onClick={handleCartAlert}
+                                onClick={() => onAddToCart(product)}
                               >
-                                Add to cart
+                                Add to Cart
+                              </button>
+                            )}
+                          </div>
+
+                          <div className="d-grid">
+                            {userId &&
+                            wishlistItems?.find(
+                              (item) =>
+                                item?.product?._id === product._id ||
+                                item?._id === product._id ||
+                                item?.product === product._id
+                            ) ? (
+                              <button
+                                className="btn btn-outline-success mt-2"
+                                onClick={handleGoToWishlist}
+                              >
+                                Go To Wishlist
+                              </button>
+                            ) : (
+                              <button
+                                className="btn btn-primary mt-2"
+                                onClick={() => onMoveToWishlist(product)}
+                              >
+                                Add to Wishlist
                               </button>
                             )}
                           </div>

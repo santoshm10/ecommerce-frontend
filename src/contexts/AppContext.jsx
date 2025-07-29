@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+//import { useEffect } from "react";
 
 const AppContext = createContext();
 
@@ -14,23 +15,19 @@ export function AppContextProvider({ children }) {
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const [showUserLogin, setShowUserLogin] = useState(false);
   const [cartIconAlert, setCartIconAlert] = useState("");
+
   const [count, setCount] = useState(1);
   const [category, setCategory] = useState([]);
   const [rating, setRating] = useState(null);
   const [sort, setSort] = useState(null);
   const [priceRange, setPriceRange] = useState({ max: 10000 });
   const [searchQuery, setSearchQuery] = useState("");
+
   const [cartItems, setCartItems] = useState([]);
-  const [localCartItems, setLocalCartItems] = useState([]);
   const [wishlistItems, setWishlistItem] = useState([]);
-  const [localWishlistItems, setLocalWishlistItems] = useState([]);
+
   const [userId, setUserId] = useState("68103fd1e368407f3b0d93ef"); //userId = "68103fd1e368407f3b0d93ef"; // Replace with logged-in user ID later
   const [deliveryAddres, setDeliveryAddress] = useState("");
-  const [newUserData, setNewUserData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
 
   const reduce = () => {
     setCount((c) => (c > 0 ? c - 1 : c));
@@ -84,7 +81,6 @@ export function AppContextProvider({ children }) {
         `https://ecommerce-backend-gules-phi.vercel.app/api/wishlist/${userId}`
       );
       const wishlistResult = await response.json();
-      console.log("Fetched Wishlist Result:", wishlistResult);
 
       setWishlistItem(
         Array.isArray(wishlistResult)
@@ -101,7 +97,7 @@ export function AppContextProvider({ children }) {
 
   // wishlist button: onclick product add or send in wishlist
   const handleAddToWishlist = async (user, productId, quantity) => {
-    console.log("handleAddToWishlist →", { user, productId, quantity });
+    setWishlistItem((prev) => prev.filter((item) => item._id !== productId));
 
     try {
       // Check if item already in wishlist
@@ -171,6 +167,9 @@ export function AppContextProvider({ children }) {
 
   //Remove from wishliat
   const removeFromWishlist = async (wishlistItemId) => {
+    setWishlistItem((prev) =>
+      prev.filter((item) => item._id !== wishlistItemId)
+    );
     try {
       const response = await fetch(
         `https://ecommerce-backend-gules-phi.vercel.app/api/wishlist/${wishlistItemId}`,
@@ -210,19 +209,25 @@ export function AppContextProvider({ children }) {
   // Add to Cart (with check for existing product)
 
   const handleAddToCart = async (user, product, quantity) => {
-    console.log("user, product, quantity", user, product, quantity);
-
     try {
-      // ✅ Refresh cart first to get updated backend state
-      await fetchCart();
-
       const latestCart = Array.isArray(cartItems) ? cartItems : [];
 
       const existingItem = latestCart.find(
-        (item) => item.product._id === product
+        (item) =>
+          item?.product?._id === product ||
+          item?._id === product ||
+          item?.product === product
       );
 
       if (existingItem) {
+        setCartItems((prev) =>
+          prev.map((item) =>
+            item.product._id === product
+              ? { ...item, quantity: item.quantity + quantity }
+              : item
+          )
+        );
+
         await updateCartQuantity(product, existingItem.quantity + quantity);
         toast.success("Product already in cart! Quantity Increased");
       } else {
@@ -235,10 +240,11 @@ export function AppContextProvider({ children }) {
           }
         );
 
-        const result = await response.json();
+        const result = await response.json(); // ✅ only once
+
         if (response.ok) {
+          setCartItems((prev) => [...prev, result]);
           toast.success("Product added to cart");
-          await fetchCart();
         } else {
           toast.error("Failed to add to cart: " + result.error);
         }
@@ -250,6 +256,11 @@ export function AppContextProvider({ children }) {
 
   //Update Quantity
   const updateCartQuantity = async (productId, quantity) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.product._id === productId ? { ...item, quantity } : item
+      )
+    );
     try {
       const response = await fetch(
         "https://ecommerce-backend-gules-phi.vercel.app/api/cart",
@@ -260,15 +271,22 @@ export function AppContextProvider({ children }) {
         }
       );
 
-      if (response.ok) {
+      if (!response.ok) {
+        toast.error("Failed to update quantity");
+        await fetchCart(); // fallback
       }
     } catch (error) {
       console.error("Update quantity error:", error);
+      toast.error("Network error during update");
+      await fetchCart(); // fallback
     }
   };
 
   //Remove from Cart
   const removeFromCart = async (cartItemId) => {
+    // Optimistic Update
+    setCartItems((prev) => prev.filter((item) => item._id !== cartItemId));
+
     try {
       const response = await fetch(
         `https://ecommerce-backend-gules-phi.vercel.app/api/cart/${cartItemId}`,
@@ -277,12 +295,16 @@ export function AppContextProvider({ children }) {
         }
       );
 
-      toast.success("Product remove from cart");
-      if (response.ok) {
-        await fetchCart();
+      if (!response.ok) {
+        toast.error("Failed to remove from cart");
+        await fetchCart(); // fallback
+      } else {
+        toast.success("Product removed from cart");
       }
     } catch (error) {
       console.error("Remove from cart error:", error);
+      toast.error("Network error during remove");
+      await fetchCart(); // fallback
     }
   };
 
@@ -300,7 +322,6 @@ export function AppContextProvider({ children }) {
     navigate(`/cart`);
   };
 
-  // POST or sending data from cart to order and DELETE all cart items after placing order
   const handlePlaceOrder = async (userId, cartItems, deliveryAddress) => {
     // 0️⃣ Basic validations
     if (!Array.isArray(cartItems) || cartItems.length === 0) {
@@ -312,13 +333,13 @@ export function AppContextProvider({ children }) {
     }
 
     if (!deliveryAddress) {
-      return alert("Delivery address missing. Please Selecte Address.");
+      return alert("Delivery address missing. Please Select Address.");
     }
 
     try {
       // 1️⃣ Build payload
       const orderItem = cartItems.map((item) => ({
-        product: item.product._id,
+        product: item.product._id || item.product, // support populated or non-populated
         quantity: item.quantity,
       }));
 
@@ -357,6 +378,7 @@ export function AppContextProvider({ children }) {
         `https://ecommerce-backend-gules-phi.vercel.app/api/cart/user/${userId}`,
         { method: "DELETE" }
       );
+
       const deleteResult = await deleteRes.json();
 
       if (!deleteRes.ok) {
@@ -368,13 +390,21 @@ export function AppContextProvider({ children }) {
 
       // 4️⃣ Clear frontend state & re‑fetch
       setCartItems([]);
-      setLocalCartItems([]);
-      await fetchCart();
+      // If using fetchCart elsewhere to sync nav/cart count, enable below:
+      // await fetchCart();
     } catch (err) {
       console.error("Error in handlePlaceOrder:", err);
       alert("Something went wrong while placing the order.");
     }
   };
+
+  /*  useEffect( () => {
+  if (userId) {
+    fetchCart();
+    fetchWishlist();
+  }
+}, [ fetchCart, fetchWishlist]);
+ */
 
   return (
     <AppContext.Provider
@@ -396,7 +426,7 @@ export function AppContextProvider({ children }) {
         removeFromCart,
         userId,
         cartLoading,
-        wishlistLoading, 
+        wishlistLoading,
         showUserLogin,
         setShowUserLogin,
         setUserId,
@@ -408,12 +438,11 @@ export function AppContextProvider({ children }) {
         removeFromWishlist,
         fetchWishlist,
         wishlistItems,
-        newUserData,
-        setNewUserData,
-        localCartItems,
-        setLocalCartItems,
-        localWishlistItems,
-        setLocalWishlistItems,
+
+        //localCartItems,
+        //setLocalCartItems,
+        //localWishlistItems,
+        //setLocalWishlistItems,
         deliveryAddres,
         setDeliveryAddress,
         handleDeliveryAddress,

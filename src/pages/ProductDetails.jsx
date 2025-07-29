@@ -2,14 +2,34 @@ import StarRating from "../components/StarRating";
 import useFetch from "../useFetch";
 import { useParams } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ProductDetails = () => {
-  const { count, reduce, increse, handleAddToCart, handleCartAlert, userId } =
-    useAppContext();
+  const {
+    count,
+    reduce,
+    increse,
+    handleAddToCart,
+    userId,
+    fetchCart,
+    fetchWishlist,
+  } = useAppContext();
   const { productId } = useParams();
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/products"
   );
+  const navigate = useNavigate();
+
+  const handleGoToCart = () => {
+    navigate("/cart");
+  };
+
+  // Fetch cart initially
+  useEffect(() => {
+    fetchCart();
+    fetchWishlist();
+  }, []);
 
   if (loading)
     return (
@@ -40,8 +60,6 @@ const ProductDetails = () => {
               className="img-fluid bg-light"
             />
             <div className="d-grid gap-2">
-              <button className="btn btn-primary mt-2">Buy Now</button>
-
               <div className="d-grid">
                 {userId ? (
                   <button
@@ -54,10 +72,10 @@ const ProductDetails = () => {
                   </button>
                 ) : (
                   <button
-                    className="btn btn-primary mt-2"
-                    onClick={handleCartAlert}
+                    className="btn btn-outline-success mt-2"
+                    onClick={handleGoToCart}
                   >
-                    Add to cart
+                    Go to Cart
                   </button>
                 )}
               </div>
@@ -149,7 +167,6 @@ const ProductDetails = () => {
           </div>
         </div>
         <hr />
-        <h3>More items you may like in apparel</h3>
       </div>
     </div>
   );

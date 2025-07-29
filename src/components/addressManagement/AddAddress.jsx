@@ -25,14 +25,14 @@ const AddAddress = () => {
       setError("Address field cannot be empty.");
       return;
     }
-    console.log("userId: ", userId);
-    console.log("address: ", address);
-    console.log("Type of userId:", typeof userId);
-    console.log("Type of address:", typeof address);
+    //console.log("userId: ", userId);
+    //console.log("address: ", address);
+    //console.log("Type of userId:", typeof userId);
+    //console.log("Type of address:", typeof address);
 
     try {
-      console.log("userId1: ", userId);
-      console.log("address1: ", address);
+      //console.log("userId1: ", userId);
+      //console.log("address1: ", address);
       const response = await fetch(
         `https://ecommerce-backend-gules-phi.vercel.app/api/users/${userId}/address`,
 
@@ -49,7 +49,7 @@ const AddAddress = () => {
       );
 
       const data = await response.json();
-      console.log(data);
+     //console.log(data);
 
       if (!response.ok) {
         throw new Error(data.error || "Something went wrong");
@@ -112,7 +112,7 @@ const AddAddress = () => {
     setLocalAddress(data || []);
   }, [data, setLocalAddress]);
 
-  console.log("localAddress: ", localAddress.address);
+  //console.log("localAddress: ", localAddress.address);
 
   return (
     <div className="container mt-4">

@@ -11,30 +11,24 @@ function Wishlist() {
     handleCartAlert,
     fetchWishlist,
     wishlistLoading,
-    localWishlistItems,
-    setLocalWishlistItems
+    fetchCart,
   } = useAppContext();
 
-  // Fetch wishlist on load
+  // Fetch wishlist and cart on page load
   useEffect(() => {
     fetchWishlist();
+    fetchCart();
   }, []);
 
-  // Sync local state when global wishlist updates
-  useEffect(() => {
-    setLocalWishlistItems(wishlistItems || []);
-  }, [wishlistItems, setLocalWishlistItems]);
-
-  // Optimistic Remove from Wishlist
-  const handleRemoveFromWishlist = (itemId) => {
-    setLocalWishlistItems((prev) => prev.filter((item) => item._id !== itemId));
-    removeFromWishlist(itemId);
+  // Handle removing item from wishlist
+  const handleRemoveFromWishlist = async (itemId) => {
+    await removeFromWishlist(itemId);
   };
 
-  // Optimistic Move to Cart
+  // Move to cart and remove from wishlist
   const moveToCart = async (item) => {
-    setLocalWishlistItems((prev) => prev.filter((i) => i._id !== item._id));
     await handleAddToCart(item.user, item.product._id, item.quantity);
+
     await removeFromWishlist(item._id);
   };
 
@@ -50,12 +44,12 @@ function Wishlist() {
   return (
     <div className="container mt-4">
       <div className="row">
-        {Array.isArray(localWishlistItems) && localWishlistItems.length === 0 && (
+        {Array.isArray(wishlistItems) && wishlistItems.length === 0 && (
           <p className="text-center">No products in wishlist.</p>
         )}
 
-        {Array.isArray(localWishlistItems) &&
-          localWishlistItems.map((item) => (
+        {Array.isArray(wishlistItems) &&
+          wishlistItems.map((item) => (
             <div className="col-md-3 mt-3" key={item._id}>
               <div className="card">
                 <Link to={`/products/${item.product._id}`}>

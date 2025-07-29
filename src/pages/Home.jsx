@@ -1,7 +1,11 @@
 import useFetch from "../useFetch";
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../contexts/AppContext";
+import { useEffect } from "react";
 
 const Home = () => {
+  const { fetchCart, fetchWishlist } = useAppContext();
+
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/category"
   );
@@ -11,6 +15,12 @@ const Home = () => {
   const handleCategoryClick = (categoryName) => {
     navigate(`/products/category/${categoryName}`);
   };
+
+  // Fetch cart initially
+  useEffect(() => {
+    fetchCart();
+    fetchWishlist();
+  }, []);
 
   if (loading)
     return (
@@ -26,30 +36,28 @@ const Home = () => {
     <>
       <div className="container py-4">
         <div className="row">
-          {Array.isArray(data) && data.length > 0 ? (
-            data?.map((item) => (
-            <div className="col" key={item._id}>
-              <div
-                className="card text-decoration-none text-dark"
-                onClick={() => handleCategoryClick(item.category)}
-                style={{ cursor: "pointer" }}
-              >
-                <div className="card-body">
-                  <img
-                    src="https://www.pngall.com/wp-content/uploads/2016/05/Jacket-PNG.png"
-                    alt={item.category}
-                    className="img-thumbnail"
-                  />
-                  <h5 className="card-title text-center mt-2">
-                    {item.category}
-                  </h5>
+          {Array.isArray(data) && data.length > 0
+            ? data?.map((item) => (
+                <div className="col" key={item._id}>
+                  <div
+                    className="card text-decoration-none text-dark"
+                    onClick={() => handleCategoryClick(item.category)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <div className="card-body">
+                      <img
+                        src="https://www.pngall.com/wp-content/uploads/2016/05/Jacket-PNG.png"
+                        alt={item.category}
+                        className="img-thumbnail"
+                      />
+                      <h5 className="card-title text-center mt-2">
+                        {item.category}
+                      </h5>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
               ))
-          ) : (
-            <p>Loading categories...</p>
-          )}
+            : !loading && <p>No categories found.</p>}
         </div>
 
         <div className="row">

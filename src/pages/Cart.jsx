@@ -2,7 +2,6 @@ import { useAppContext } from "../contexts/AppContext";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-
 function Cart() {
   const {
     cartItems,
@@ -11,34 +10,29 @@ function Cart() {
     removeFromCart,
     cartLoading,
     handleAddToWishlist,
-    localCartItems,
-    setLocalCartItems,
     userId,
     deliveryAddres,
-    handlePlaceOrder
-    
+    handlePlaceOrder,
+    fetchWishlist,
   } = useAppContext();
 
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
-   const handleAddNewAddress = () => {
+  const handleAddNewAddress = () => {
     navigate(`/profile/${userId}/address`);
   };
 
-  const handlePlaceOrderAndRedirect = ()=> {
-    handlePlaceOrder(userId, cartItems, deliveryAddres)
-    navigate("/profile")
-  }
+  const handlePlaceOrderAndRedirect = () => {
+    handlePlaceOrder(userId, cartItems, deliveryAddres);
+    console.log("on click of place order: ", userId, cartItems, deliveryAddres);
+    navigate("/profile");
+  };
 
   // Fetch cart initially
   useEffect(() => {
     fetchCart();
+    fetchWishlist();
   }, []);
-
-  // Sync local state with global cartItems
-  useEffect(() => {
-    setLocalCartItems(cartItems || []);
-  }, [cartItems, setLocalCartItems]);
 
   // Handle Quantity Change
   const handleQuantityChange = (productId, currentQuantity, type) => {
@@ -46,41 +40,32 @@ function Cart() {
       type === "increase" ? currentQuantity + 1 : currentQuantity - 1;
     if (newQuantity < 1) return;
 
-    // Optimistically update local cart
-    const updatedCart = localCartItems.map((item) =>
-      item.product._id === productId ? { ...item, quantity: newQuantity } : item
-    );
-    setLocalCartItems(updatedCart);
-
-    // Update backend
+    // Optimistically update global cartItems
     updateCartQuantity(productId, newQuantity);
   };
 
   // Handle Remove from Cart
   const handleRemoveFromCart = (itemId) => {
-    setLocalCartItems((prev) => prev.filter((item) => item._id !== itemId));
     removeFromCart(itemId);
   };
 
   // Handle Move to Wishlist
   const moveToWishlist = async (item) => {
-    setLocalCartItems((prev) => prev.filter((i) => i._id !== item._id));
-   
     await handleAddToWishlist(item.user, item.product._id, item.quantity);
     await removeFromCart(item._id);
-   
   };
 
   // Calculations
-  const totalPrice = Array.isArray(localCartItems)
-    ? localCartItems.reduce(
-        (total, item) => total + item.product.price * item.quantity,
-        0
-      )
-    : 0;
+  const totalPrice = cartItems.reduce((acc, item) => {
+    if (item?.product && typeof item.product.price === "number") {
+      return acc + item.product.price * item.quantity;
+    }
+    return acc;
+  }, 0);
 
-  const totalDiscount = Array.isArray(localCartItems)
-    ? localCartItems.reduce((total, item) => {
+  const totalDiscount = Array.isArray(cartItems)
+    ? cartItems.reduce((total, item) => {
+        if (!item?.product) return total;
         const price = item.product.price;
         const discountPercent = item.product.discount || 0;
         const quantity = item.quantity;
@@ -91,12 +76,17 @@ function Cart() {
 
   const finalPrice = totalPrice - totalDiscount;
 
-  const totalItems = Array.isArray(localCartItems)
-    ? localCartItems.reduce((total, item) => total + item.quantity, 0)
+  const totalItems = Array.isArray(cartItems)
+    ? cartItems.reduce((total, item) => {
+        if (!item?.product) return total;
+        return total + item.quantity;
+      }, 0)
     : 0;
 
-  const deliveryCharges = Array.isArray(localCartItems)
-    ? localCartItems.some((item) => item.product?.isFreeDelivery === false)
+  const deliveryCharges = Array.isArray(cartItems)
+    ? cartItems.some(
+        (item) => item.product && item.product.isFreeDelivery === false
+      )
       ? 400
       : 0
     : 0;
@@ -115,72 +105,74 @@ function Cart() {
       <div className="container bg-white">
         <div className="row">
           <div className="col-md-6">
-            {Array.isArray(localCartItems) && localCartItems.length === 0 && (
+            {Array.isArray(cartItems) && cartItems.length === 0 && (
               <p className="text-center text-muted">Your cart is empty.</p>
             )}
 
-            {Array.isArray(localCartItems) &&
-              localCartItems.map((item) => (
-                <div className="card my-2" key={item._id}>
-                  <div className="row">
-                    <div className="col-md-6">
-                      <img
-                        className="card-img img-fluid"
-                        src={item.product.imageUrls[0]}
-                        alt={item.product.name}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <div className="card-body">
-                        <h5>{item.product.name}</h5>
-                        <p>₹{item.product.price}</p>
-                        <div className="d-flex align-items-center gap-2">
-                          <p className="mb-0 fs-5">Qty:</p>
+            {Array.isArray(cartItems) &&
+              cartItems?.map((item) =>
+                item?.product ? (
+                  <div className="card my-2" key={item._id}>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <img
+                          className="card-img img-fluid"
+                          src={item.product?.imageUrls?.[0]}
+                          alt={item.product.name}
+                        />
+                      </div>
+                      <div className="col-md-6">
+                        <div className="card-body">
+                          <h5>{item.product.name}</h5>
+                          <p>₹{item.product.price}</p>
+                          <div className="d-flex align-items-center gap-2">
+                            <p className="mb-0 fs-5">Qty:</p>
+                            <button
+                              className="btn btn-outline-secondary rounded-circle"
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.product._id,
+                                  item.quantity,
+                                  "decrease"
+                                )
+                              }
+                            >
+                              -
+                            </button>
+                            <span className="px-3">{item.quantity}</span>
+                            <button
+                              className="btn btn-outline-secondary rounded-circle"
+                              onClick={() =>
+                                handleQuantityChange(
+                                  item.product._id,
+                                  item.quantity,
+                                  "increase"
+                                )
+                              }
+                            >
+                              +
+                            </button>
+                          </div>
+
                           <button
-                            className="btn btn-outline-secondary rounded-circle"
-                            onClick={() =>
-                              handleQuantityChange(
-                                item.product._id,
-                                item.quantity,
-                                "decrease"
-                              )
-                            }
+                            className="btn btn-secondary btn-sm mt-2"
+                            onClick={() => handleRemoveFromCart(item._id)}
                           >
-                            -
+                            Remove From Cart
                           </button>
-                          <span className="px-3">{item.quantity}</span>
+
                           <button
-                            className="btn btn-outline-secondary rounded-circle"
-                            onClick={() =>
-                              handleQuantityChange(
-                                item.product._id,
-                                item.quantity,
-                                "increase"
-                              )
-                            }
+                            className="btn btn-outline-secondary btn-sm mt-2"
+                            onClick={() => moveToWishlist(item)}
                           >
-                            +
+                            Move to Wishlist
                           </button>
                         </div>
-
-                        <button
-                          className="btn btn-secondary btn-sm mt-2"
-                          onClick={() => handleRemoveFromCart(item._id)}
-                        >
-                          Remove From Cart
-                        </button>
-
-                        <button
-                          className="btn btn-outline-secondary btn-sm mt-2"
-                          onClick={() => moveToWishlist(item)}
-                        >
-                          Move to Wishlist
-                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ) : null
+              )}
           </div>
 
           <div className="col-md-6">
@@ -192,8 +184,12 @@ function Cart() {
                 <p>{deliveryAddres}</p>
 
                 <div className="d-flex gap-3">
-                  
-                  <button className="btn btn-primary" onClick={handleAddNewAddress}>Add New Address</button>
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleAddNewAddress}
+                  >
+                    Add New Address
+                  </button>
                 </div>
               </div>
             </div>
@@ -214,7 +210,12 @@ function Cart() {
               </p>
               <hr />
               <p>You will save ₹{totalDiscount} on this order</p>
-              <button className="btn btn-primary" onClick={handlePlaceOrderAndRedirect}>PLACE ORDER</button>
+              <button
+                className="btn btn-primary"
+                onClick={handlePlaceOrderAndRedirect}
+              >
+                PLACE ORDER
+              </button>
             </div>
           </div>
         </div>

@@ -5,10 +5,10 @@ const Nav = () => {
   const {
     userId,
     handleCartAlert,
-    localCartItems,
-    localWishlistItems,
+    cartItems,
     searchQuery,
     handleSearchChange,
+    wishlistItems,
   } = useAppContext();
 
   return (
@@ -69,7 +69,7 @@ const Nav = () => {
                     to="/cart"
                   >
                     <span className="position-absolute top-70 start-100 translate-middle badge rounded-pill bg-danger">
-                      {localCartItems.length}
+                      {cartItems.length}
                     </span>
                     <i className="bi bi-cart3 fs-4"></i>
                   </NavLink>
@@ -92,7 +92,7 @@ const Nav = () => {
                     to="/wishlist"
                   >
                     <span className="position-absolute top-70 start-100 translate-middle badge rounded-pill bg-danger">
-                      {localWishlistItems.length}
+                      {wishlistItems.length}
                     </span>
                     <i className="bi bi-heart fs-4"></i>
                   </NavLink>

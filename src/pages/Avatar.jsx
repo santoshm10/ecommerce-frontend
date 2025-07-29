@@ -12,10 +12,6 @@ const Avatar = () => {
     `https://ecommerce-backend-gules-phi.vercel.app/api/users/${userId}`
   );
 
-  console.log("user data by user iD: ", data);
-  console.log("user localAvatar by user iD: ", localAvatar);
-
-  // Sync local state with global Avatar
   useEffect(() => {
     if (data && typeof data === "object") {
       setLocalAvatar(data);
@@ -70,8 +66,7 @@ const Avatar = () => {
         <p className="text-muted mt-3">No user found.</p>
       )}
 
-        <Orders/>
-      
+      <Orders />
     </div>
   );
 };
