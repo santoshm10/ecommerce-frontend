@@ -24,7 +24,6 @@ function Cart() {
 
   const handlePlaceOrderAndRedirect = () => {
     handlePlaceOrder(userId, cartItems, deliveryAddres);
-    console.log("on click of place order: ", userId, cartItems, deliveryAddres);
     navigate("/profile");
   };
 
@@ -113,7 +112,7 @@ function Cart() {
               cartItems?.map((item) =>
                 item?.product ? (
                   <div className="card my-2" key={item._id}>
-                    <div className="row">
+                    <div className="row ps-4">
                       <div className="col-md-6">
                         <img
                           className="card-img img-fluid"
@@ -125,7 +124,7 @@ function Cart() {
                         <div className="card-body">
                           <h5>{item.product.name}</h5>
                           <p>₹{item.product.price}</p>
-                          <div className="d-flex align-items-center gap-2">
+                          <div className="d-flex align-items-center gap-2 mb-3">
                             <p className="mb-0 fs-5">Qty:</p>
                             <button
                               className="btn btn-outline-secondary rounded-circle"
@@ -155,7 +154,7 @@ function Cart() {
                           </div>
 
                           <button
-                            className="btn btn-secondary btn-sm mt-2"
+                            className="btn btn-primary btn-sm mt-2"
                             onClick={() => handleRemoveFromCart(item._id)}
                           >
                             Remove From Cart

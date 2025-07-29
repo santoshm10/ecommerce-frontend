@@ -50,6 +50,7 @@ export function AppContextProvider({ children }) {
     setCategory([]);
     setRating(null);
     setSort(null);
+    setPriceRange({ max: 10000 })
   };
 
   const ratingFilter = (e) => {
@@ -333,7 +334,8 @@ export function AppContextProvider({ children }) {
     }
 
     if (!deliveryAddress) {
-      return alert("Delivery address missing. Please Select Address.");
+      alert("Delivery address missing. Please Select Address.");
+      return 
     }
 
     try {
@@ -438,11 +440,6 @@ export function AppContextProvider({ children }) {
         removeFromWishlist,
         fetchWishlist,
         wishlistItems,
-
-        //localCartItems,
-        //setLocalCartItems,
-        //localWishlistItems,
-        //setLocalWishlistItems,
         deliveryAddres,
         setDeliveryAddress,
         handleDeliveryAddress,

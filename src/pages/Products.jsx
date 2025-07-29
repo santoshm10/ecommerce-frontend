@@ -27,6 +27,9 @@ const Products = () => {
     fetchCart,
     fetchWishlist,
   } = useAppContext();
+  
+  
+
 
   const { data, loading, error } = useFetch(
     "https://ecommerce-backend-gules-phi.vercel.app/api/products"
@@ -116,7 +119,7 @@ const Products = () => {
     <div className="container-fluid bg-dark-subtle py-3">
       <div className="row flex-column flex-md-row">
         {/* Sidebar Filters */}
-        <div className="col-12 col-md-3 bg-white px-4 py-3">
+        <div className="col-12 col-md-3 pt-4 ps-md-4 bg-white d-none d-md-block">
           <div className="d-flex align-items-center justify-content-between">
             <h4>Filters</h4>
             <button
@@ -128,7 +131,9 @@ const Products = () => {
           </div>
 
           <div>
-            <p><strong>Price Range</strong></p>
+            <p>
+              <strong>Price Range</strong>
+            </p>
             <label htmlFor="priceRange" className="form-label">
               Up to ₹{priceRange.max}
             </label>
@@ -146,7 +151,9 @@ const Products = () => {
           </div>
 
           <div>
-            <p><strong>Category</strong></p>
+            <p>
+              <strong>Category</strong>
+            </p>
             {["Men", "Women", "Kids", "Electronics", "Home"].map((cat) => (
               <div key={cat}>
                 <input
@@ -155,13 +162,17 @@ const Products = () => {
                   value={cat}
                   onChange={selectCategory}
                 />
-                <label htmlFor={cat} className="ms-1">{cat} clothing</label>
+                <label htmlFor={cat} className="ms-1">
+                  {cat} clothing
+                </label>
               </div>
             ))}
           </div>
 
           <div className="mt-3">
-            <p><strong>Rating</strong></p>
+            <p>
+              <strong>Rating</strong>
+            </p>
             {[4, 3, 2, 1].map((star) => (
               <div key={star}>
                 <input
@@ -179,7 +190,9 @@ const Products = () => {
           </div>
 
           <div className="mt-3">
-            <p><strong>Sort By</strong></p>
+            <p>
+              <strong>Sort By</strong>
+            </p>
             <div>
               <input
                 type="radio"
@@ -188,7 +201,9 @@ const Products = () => {
                 value="ascending"
                 onChange={sortByFilter}
               />
-              <label htmlFor="lowHigh" className="ms-1">Price - Low to High</label>
+              <label htmlFor="lowHigh" className="ms-1">
+                Price - Low to High
+              </label>
             </div>
             <div>
               <input
@@ -198,20 +213,24 @@ const Products = () => {
                 value="descending"
                 onChange={sortByFilter}
               />
-              <label htmlFor="highLow" className="ms-1">Price - High to Low</label>
+              <label htmlFor="highLow" className="ms-1">
+                Price - High to Low
+              </label>
             </div>
           </div>
         </div>
 
         {/* Product List */}
         <div className="col-12 col-md-9 mt-4 mt-md-0">
+          
+
           <div className="row">
             {sortedData.length === 0 ? (
               <p className="text-center">No products found in this category.</p>
             ) : (
               sortedData.map((product) => (
                 <div
-                  className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
+                  className="col-12 col-sm-6 col-md-4 col-lg-3 mt-3"
                   key={product._id}
                 >
                   <div className="card h-100">
@@ -223,7 +242,9 @@ const Products = () => {
                       />
                     </Link>
                     <div className="card-body text-center">
-                      <p className="card-title"><strong>{product.name}</strong></p>
+                      <p className="card-title">
+                        <strong>{product.name}</strong>
+                      </p>
                       <p className="card-text">RS. {product.price}</p>
 
                       <div className="d-grid gap-2">
