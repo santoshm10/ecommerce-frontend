@@ -1,9 +1,7 @@
 import useFetch from "../useFetch";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
-import { useNavigate } from "react-router-dom";
 
 const Products = () => {
   const { category: routeCategory } = useParams();
@@ -27,7 +25,7 @@ const Products = () => {
     cartItems,
     wishlistItems,
     fetchCart,
-    fetchWishlist
+    fetchWishlist,
   } = useAppContext();
 
   const { data, loading, error } = useFetch(
@@ -61,7 +59,7 @@ const Products = () => {
     );
     if (!alreadyInWishlist) {
       await handleAddToWishlist(userId, product._id, product.quantity);
-      fetchWishlist()
+      fetchWishlist();
     }
   };
 
@@ -75,9 +73,7 @@ const Products = () => {
           : true;
 
       const ratingMatch = rating !== null ? product.rating >= rating : true;
-
       const priceMatch = product.price <= priceRange.max;
-
       const searchMatch = product.name
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
@@ -100,7 +96,6 @@ const Products = () => {
         })
       : filteredData;
 
-  // Fetch cart initially
   useEffect(() => {
     fetchCart();
     fetchWishlist();
@@ -114,229 +109,177 @@ const Products = () => {
         </div>
       </div>
     );
+
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <>
-      <div className="  bg-dark-subtle">
-        <div className="">
-          <div className="row">
-            <div className="col-md-3 pt-4 ps-5 bg-white">
-              <div className="d-flex aline-item-center gap-2">
-                <h3>Filters</h3>{" "}
-                <button
-                  className="btn btn-link link-dark justify-content-end"
-                  onClick={clearFilter}
-                >
-                  Clear
-                </button>
+    <div className="container-fluid bg-dark-subtle py-3">
+      <div className="row flex-column flex-md-row">
+        {/* Sidebar Filters */}
+        <div className="col-12 col-md-3 bg-white px-4 py-3">
+          <div className="d-flex align-items-center justify-content-between">
+            <h4>Filters</h4>
+            <button
+              className="btn btn-link link-dark p-0"
+              onClick={clearFilter}
+            >
+              Clear
+            </button>
+          </div>
+
+          <div>
+            <p><strong>Price Range</strong></p>
+            <label htmlFor="priceRange" className="form-label">
+              Up to ₹{priceRange.max}
+            </label>
+            <input
+              type="range"
+              className="form-range"
+              id="priceRange"
+              name="max"
+              min="0"
+              max="10000"
+              step="100"
+              value={priceRange.max}
+              onChange={priceFilter}
+            />
+          </div>
+
+          <div>
+            <p><strong>Category</strong></p>
+            {["Men", "Women", "Kids", "Electronics", "Home"].map((cat) => (
+              <div key={cat}>
+                <input
+                  type="checkbox"
+                  id={cat}
+                  value={cat}
+                  onChange={selectCategory}
+                />
+                <label htmlFor={cat} className="ms-1">{cat} clothing</label>
               </div>
-              <div>
-                <p>
-                  <strong>Price Range</strong>
-                </p>
-                <label htmlFor="priceRange" className="form-label">
-                  Up to ₹{priceRange.max}
+            ))}
+          </div>
+
+          <div className="mt-3">
+            <p><strong>Rating</strong></p>
+            {[4, 3, 2, 1].map((star) => (
+              <div key={star}>
+                <input
+                  type="radio"
+                  name="rating"
+                  id={`${star}Star`}
+                  value={star}
+                  onChange={ratingFilter}
+                />
+                <label htmlFor={`${star}Star`} className="ms-1">
+                  {star} Star & Above
                 </label>
-                <input
-                  type="range"
-                  className="form-range"
-                  id="priceRange"
-                  name="max"
-                  min="0"
-                  max="10000"
-                  step="100"
-                  value={priceRange.max}
-                  onChange={priceFilter}
-                />
-                <p>
-                  <strong>Category</strong>
-                </p>
-                <input
-                  type="checkbox"
-                  id="men"
-                  value="Men"
-                  onChange={selectCategory}
-                />
-                <label htmlFor="men">Men clothing</label> <br />
-
-                <input
-                  type="checkbox"
-                  id="women"
-                  value="Women"
-                  onChange={selectCategory}
-                />
-                <label htmlFor="women">Women clothing</label> <br />
-
-                <input
-                  type="checkbox"
-                  id="kids"
-                  value="Kids"
-                  onChange={selectCategory}
-                />
-                <label htmlFor="kids">Kids clothing</label> <br />
-
-                <input
-                  type="checkbox"
-                  id="electronics"
-                  value="Electronics"
-                  onChange={selectCategory}
-                />
-                <label htmlFor="electronics">Electronics</label> <br />
-
-                <input
-                  type="checkbox"
-                  id="home"
-                  value="Home"
-                  onChange={selectCategory}
-                />
-                <label htmlFor="home">Home</label>
-
-              </div>{" "}
-              <br />
-              <div>
-                <p>
-                  <strong>Rating</strong>
-                </p>
-                <input
-                  type="radio"
-                  name="rating"
-                  id="4StarAbove"
-                  value="4"
-                  onChange={ratingFilter}
-                />{" "}
-                4 Star & Above <br />
-                <input
-                  type="radio"
-                  name="rating"
-                  id="3StarAbove"
-                  value="3"
-                  onChange={ratingFilter}
-                />{" "}
-                3 Star & Above <br />
-                <input
-                  type="radio"
-                  name="rating"
-                  id="2StarAbove"
-                  value="2"
-                  onChange={ratingFilter}
-                />{" "}
-                2 Star & Above <br />
-                <input
-                  type="radio"
-                  name="rating"
-                  id="1StarAbove"
-                  value="1"
-                  onChange={ratingFilter}
-                />{" "}
-                1 Star & Above
-              </div>{" "}
-              <br />
-              <div>
-                <p>
-                  <strong>Sort By</strong>
-                </p>
-                <input
-                  type="radio"
-                  name="sortBy"
-                  id="4StarAbove"
-                  value="ascending"
-                  onChange={sortByFilter}
-                />{" "}
-                Price - Low to High <br />
-                <input
-                  type="radio"
-                  name="sortBy"
-                  id="3StarAbove"
-                  value="descending"
-                  onChange={sortByFilter}
-                />{" "}
-                Price - High to Low
               </div>
+            ))}
+          </div>
+
+          <div className="mt-3">
+            <p><strong>Sort By</strong></p>
+            <div>
+              <input
+                type="radio"
+                name="sortBy"
+                id="lowHigh"
+                value="ascending"
+                onChange={sortByFilter}
+              />
+              <label htmlFor="lowHigh" className="ms-1">Price - Low to High</label>
             </div>
-            <div className="col-md-9 ">
-              <div className="">
-                <div className="row">
-                  {sortedData.length === 0 && (
-                    <p className="text-center">
-                      No products found in this category.
-                    </p>
-                  )}
-
-                  {sortedData?.map((product) => (
-                    <div className="col-md-3 mt-3" key={product._id}>
-                      <div className="card ">
-                        <Link to={`/products/${product._id}`}>
-                          <img
-                            src={product.imageUrls[0]}
-                            alt=""
-                            className="card-img-top img-fluid bg-light py-2"
-                          />
-                        </Link>
-                        <div className="card-body text-center">
-                          <p className="card-title center">
-                            <strong>{product.name}</strong>
-                          </p>
-                          <p className="card-text">RS. {product.price}</p>
-
-                          <div className="d-grid">
-                            {userId &&
-                            cartItems?.some(
-                              (item) =>
-                                item?.product?._id === product._id ||
-                                item?._id === product._id ||
-                                item?.product === product._id
-                            ) ? (
-                              <button
-                                className="btn btn-outline-success mt-2"
-                                onClick={handleGoToCart}
-                              >
-                                Go To Cart
-                              </button>
-                            ) : (
-                              <button
-                                className="btn btn-primary mt-2"
-                                onClick={() => onAddToCart(product)}
-                              >
-                                Add to Cart
-                              </button>
-                            )}
-                          </div>
-
-                          <div className="d-grid">
-                            {userId &&
-                            wishlistItems?.find(
-                              (item) =>
-                                item?.product?._id === product._id ||
-                                item?._id === product._id ||
-                                item?.product === product._id
-                            ) ? (
-                              <button
-                                className="btn btn-outline-success mt-2"
-                                onClick={handleGoToWishlist}
-                              >
-                                Go To Wishlist
-                              </button>
-                            ) : (
-                              <button
-                                className="btn btn-primary mt-2"
-                                onClick={() => onMoveToWishlist(product)}
-                              >
-                                Add to Wishlist
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            <div>
+              <input
+                type="radio"
+                name="sortBy"
+                id="highLow"
+                value="descending"
+                onChange={sortByFilter}
+              />
+              <label htmlFor="highLow" className="ms-1">Price - High to Low</label>
             </div>
           </div>
         </div>
+
+        {/* Product List */}
+        <div className="col-12 col-md-9 mt-4 mt-md-0">
+          <div className="row">
+            {sortedData.length === 0 ? (
+              <p className="text-center">No products found in this category.</p>
+            ) : (
+              sortedData.map((product) => (
+                <div
+                  className="col-12 col-sm-6 col-md-4 col-lg-3 mb-4"
+                  key={product._id}
+                >
+                  <div className="card h-100">
+                    <Link to={`/products/${product._id}`}>
+                      <img
+                        src={product.imageUrls[0]}
+                        alt={product.name}
+                        className="card-img-top img-fluid bg-light p-2"
+                      />
+                    </Link>
+                    <div className="card-body text-center">
+                      <p className="card-title"><strong>{product.name}</strong></p>
+                      <p className="card-text">RS. {product.price}</p>
+
+                      <div className="d-grid gap-2">
+                        {userId &&
+                        cartItems?.some(
+                          (item) =>
+                            item?.product?._id === product._id ||
+                            item?._id === product._id ||
+                            item?.product === product._id
+                        ) ? (
+                          <button
+                            className="btn btn-outline-success"
+                            onClick={handleGoToCart}
+                          >
+                            Go To Cart
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => onAddToCart(product)}
+                          >
+                            Add to Cart
+                          </button>
+                        )}
+
+                        {userId &&
+                        wishlistItems?.some(
+                          (item) =>
+                            item?.product?._id === product._id ||
+                            item?._id === product._id ||
+                            item?.product === product._id
+                        ) ? (
+                          <button
+                            className="btn btn-outline-success"
+                            onClick={handleGoToWishlist}
+                          >
+                            Go To Wishlist
+                          </button>
+                        ) : (
+                          <button
+                            className="btn btn-primary"
+                            onClick={() => onMoveToWishlist(product)}
+                          >
+                            Add to Wishlist
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 

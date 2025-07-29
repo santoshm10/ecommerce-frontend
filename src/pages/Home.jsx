@@ -16,7 +16,6 @@ const Home = () => {
     navigate(`/products/category/${categoryName}`);
   };
 
-  // Fetch cart initially
   useEffect(() => {
     fetchCart();
     fetchWishlist();
@@ -30,65 +29,78 @@ const Home = () => {
         </div>
       </div>
     );
+
   if (error) return <p>Error: {error}</p>;
 
   return (
     <>
       <div className="container py-4">
-        <div className="row">
-          {Array.isArray(data) && data.length > 0
-            ? data?.map((item) => (
-                <div className="col" key={item._id}>
-                  <div
-                    className="card text-decoration-none text-dark"
-                    onClick={() => handleCategoryClick(item.category)}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <div className="card-body">
-                      <img
-                        src="https://www.pngall.com/wp-content/uploads/2016/05/Jacket-PNG.png"
-                        alt={item.category}
-                        className="img-thumbnail"
-                      />
-                      <h5 className="card-title text-center mt-2">
-                        {item.category}
-                      </h5>
-                    </div>
+
+        {/* Category Section */}
+        <div className="row justify-content-center">
+          {Array.isArray(data) && data.length > 0 ? (
+            data.map((item) => (
+              <div
+                className="col-6 col-sm-4 col-md-3 col-lg-2 mb-3 d-flex justify-content-center"
+                key={item._id}
+              >
+                <div
+                  className="card text-decoration-none text-dark"
+                  onClick={() => handleCategoryClick(item.category)}
+                  style={{ cursor: "pointer", maxWidth: "200px", width: "100%" }}
+                >
+                  <div className="card-body">
+                    <img
+                      src="https://www.pngall.com/wp-content/uploads/2016/05/Jacket-PNG.png"
+                      alt={item.category}
+                      className="img-thumbnail"
+                    />
+                    <h5 className="card-title text-center mt-2">
+                      {item.category}
+                    </h5>
                   </div>
                 </div>
-              ))
-            : !loading && <p>No categories found.</p>}
+              </div>
+            ))
+          ) : (
+            !loading && <p>No categories found.</p>
+          )}
         </div>
 
+        {/* Banner Image */}
         <div className="row">
-          <img
-            src="https://placehold.co/1100x400"
-            alt="Hero banner"
-            className="py-4 img-fluid center"
-          />
+          <div className="col-12">
+            <img
+              src="https://placehold.co/1100x400"
+              alt="Hero banner"
+              className="img-fluid w-100 py-4 rounded"
+            />
+          </div>
         </div>
 
+        {/* New Arrivals Section */}
         <div className="row">
-          <div className="col-md-6">
-            <div className="card mb-3">
-              <div className="row g-0 bg-dark-subtle">
-                <div className="col-md-4">
+          <div className="col-12 col-md-6 mb-4">
+            <div className="card h-100">
+              <div className="row g-0 bg-dark-subtle h-100">
+                <div className="col-4">
                   <img
                     src="https://placehold.co/50x70/000000/FFF"
                     className="card-img p-4"
                     alt="New Arrival"
                   />
                 </div>
-                <div className="col-md-8">
-                  <div className="card-body">
-                    <p className="card-text">
-                      <small className="text-body-secondary">NEW ARRIVAL</small>
-                    </p>
-                    <div className="mt-5">
+                <div className="col-8">
+                  <div className="card-body d-flex flex-column justify-content-between h-100">
+                    <div>
+                      <p className="card-text">
+                        <small className="text-body-secondary">NEW ARRIVAL</small>
+                      </p>
+                    </div>
+                    <div>
                       <h5 className="card-title">Summer Collection</h5>
                       <p className="card-text">
-                        Checkout best summer collection to stay cool this
-                        summer.
+                        Checkout best summer collection to stay cool this summer.
                       </p>
                     </div>
                   </div>
@@ -97,26 +109,27 @@ const Home = () => {
             </div>
           </div>
 
-          <div className="col-md-6">
-            <div className="card mb-3">
-              <div className="row g-0 bg-dark-subtle">
-                <div className="col-md-4">
+          <div className="col-12 col-md-6 mb-4">
+            <div className="card h-100">
+              <div className="row g-0 bg-dark-subtle h-100">
+                <div className="col-4">
                   <img
                     src="https://placehold.co/50x70/000000/FFF"
                     className="card-img p-4"
                     alt="New Arrival"
                   />
                 </div>
-                <div className="col-md-8">
-                  <div className="card-body">
-                    <p className="card-text">
-                      <small className="text-body-secondary">NEW ARRIVAL</small>
-                    </p>
-                    <div className="mt-5">
+                <div className="col-8">
+                  <div className="card-body d-flex flex-column justify-content-between h-100">
+                    <div>
+                      <p className="card-text">
+                        <small className="text-body-secondary">NEW ARRIVAL</small>
+                      </p>
+                    </div>
+                    <div>
                       <h5 className="card-title">Summer Collection</h5>
                       <p className="card-text">
-                        Checkout best summer collection to stay cool this
-                        summer.
+                        Checkout best summer collection to stay cool this summer.
                       </p>
                     </div>
                   </div>
@@ -125,6 +138,7 @@ const Home = () => {
             </div>
           </div>
         </div>
+        
       </div>
     </>
   );
