@@ -159,13 +159,39 @@ const Products = () => {
                   onChange={selectCategory}
                 />
                 <label htmlFor="men">Men clothing</label> <br />
+
                 <input
                   type="checkbox"
                   id="women"
                   value="Women"
                   onChange={selectCategory}
                 />
-                <label htmlFor="women">Women clothing</label>
+                <label htmlFor="women">Women clothing</label> <br />
+
+                <input
+                  type="checkbox"
+                  id="kids"
+                  value="Kids"
+                  onChange={selectCategory}
+                />
+                <label htmlFor="kids">Kids clothing</label> <br />
+
+                <input
+                  type="checkbox"
+                  id="electronics"
+                  value="Electronics"
+                  onChange={selectCategory}
+                />
+                <label htmlFor="electronics">Electronics</label> <br />
+
+                <input
+                  type="checkbox"
+                  id="home"
+                  value="Home"
+                  onChange={selectCategory}
+                />
+                <label htmlFor="home">Home</label>
+
               </div>{" "}
               <br />
               <div>
