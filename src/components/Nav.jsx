@@ -39,7 +39,7 @@ const Nav = () => {
             <input
               className="form-control me-2"
               type="search"
-              placeholder="Search"
+              placeholder="Search Products"
               aria-label="Search"
               value={searchQuery}
               onChange={handleSearchChange}
