@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
 
 const Nav = () => {
@@ -10,6 +10,10 @@ const Nav = () => {
     handleSearchChange,
     wishlistItems,
   } = useAppContext();
+
+  const location = useLocation()
+
+  const showSearchBar = location.pathname.startsWith("/products")
 
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -31,7 +35,8 @@ const Nav = () => {
         </button>
 
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
-          <form
+          {showSearchBar && (
+            <form
             className="d-flex ms-auto"
             role="search"
             onSubmit={(e) => e.preventDefault()}
@@ -47,7 +52,7 @@ const Nav = () => {
             <button className="btn btn-outline-success" type="submit">
               Search
             </button>
-          </form>
+          </form>)}
 
           <div className="ms-auto d-flex align-items-center">
             <ul className="navbar-nav gap-3 mb-2 mb-lg-0">
