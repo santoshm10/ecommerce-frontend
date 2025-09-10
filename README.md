@@ -6,7 +6,7 @@ It provides all essential features for an online store such as product listing, 
 --- 
 
 ## Demo Link 
-(Live Demo)[https://ecommerce-frontend-rose-ten.vercel.app/] 
+[Live Demo](https://ecommerce-frontend-rose-ten.vercel.app/)
 
 --- 
 
@@ -41,7 +41,7 @@ npm run dev
  
  ## Demo video 
  
- Watch a walkthrough (5 minutes) of all major features of this app: (Video Link)[https://drive.google.com/file/d/1YA_IABJxVSTv28Ny9k10xp9XxMMxgL8u/view] 
+ Watch a walkthrough (5 minutes) of all major features of this app: [Video Link](https://drive.google.com/file/d/1YA_IABJxVSTv28Ny9k10xp9XxMMxgL8u/view)
  
  --- 
  
@@ -135,10 +135,14 @@ Get all orders of a user
 ### **POST /api/orders**
 Create a new order
 
-## **POST /api/users/:userId/address**
+### **POST /api/users/:userId/address**
 Create address by user
 
-## **DELETE "/api/users/:userId/address/:index**
+### **DELETE "/api/users/:userId/address/:index**
 Delete address
 
---- ## Contact For bugs or feature requests, please reach out to sdmande101195@gmail.com
+--- 
+
+## Contact 
+
+For bugs or feature requests, please reach out to sdmande101195@gmail.com
