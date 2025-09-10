@@ -1,70 +1,144 @@
-# Getting Started with Create React App
+# E-Commerce
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This is a full-stack E-commerce application built using the MERN stack (MongoDB, Express.js, React, Node.js).
+It provides all essential features for an online store such as product listing, product details, cart, wishlist and order management.
 
-## Available Scripts
+--- 
 
-In the project directory, you can run:
+## Demo Link 
+(Live Demo)[https://ecommerce-frontend-rose-ten.vercel.app/] 
 
-### `npm start`
+--- 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Quick Start
+```
+Clone the repository
+git clone https://github.com/santoshm10/ecommerce-frontend.git
+git clone https://github.com/santoshm10/ecommerce-backend.git
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Frontend setup
+cd ecommerce-frontend
+npm install
+npm start
 
-### `npm test`
+Backend setup
+cd ecommerce-backend
+npm install
+npm run dev   
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```
+--- 
+## Technologies 
 
-### `npm run build`
+- React 
+- React Router 
+- Bootstrap 
+- Node.js 
+- Express 
+- MongoDB 
+ 
+ --- 
+ 
+ ## Demo video 
+ 
+ Watch a walkthrough (5 minutes) of all major features of this app: (Video Link)[https://drive.google.com/file/d/1YA_IABJxVSTv28Ny9k10xp9XxMMxgL8u/view] 
+ 
+ --- 
+ 
+ ## Features 
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+ **Navbar**
+ - Avtar, Cart, Wishlist icon buttons
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+ **Home** 
+ - Product categories (Men, Women, Kids, etc.) 
+ - Redirect to category-based product listing
+ 
+ **Products** 
+ - View all products with filters (category, rating, sort by price)
+ - Search bar to search by product name
+ - Product details page with images, size, description, and reviews
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+ **Cart** 
+ - Add/remove products to cart
+ - Increase/decrease quantity per product
+ - Dynamic total calculation
+ - Add Address button
+ - Place order button
+ 
+ **Wishlist** 
+ - Add/remove products to wishlist  
+ 
+ **Avtar** 
+ - User details
+ - Add Address button
+ - View order history
+ 
+ 
+ --- 
+ 
+ ## API Refrence 
+ 
+ ### **GET /api/products**
+ 
+ List all products<br>
+ Sample response:
+ ```
+[
+  {
+   _id, name, description, price, category, size, rating, createdAt, updatedAt,..
+  },
+]
+```
 
-### `npm run eject`
+### **GET /api/products/:id**
+Get single product details
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### **POST /api/products**
+Create new product
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### **POST /api/users**
+Create user
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+### **GET /api/cart/:userId**
+Get all cart items for a user<br> 
+ Sample responce:
+```
+[
+  {
+    _id, user, product, quantity
+  },
+]
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### **POST /api/cart**
+Add product to cart
 
-## Learn More
+### **PUT /api/cart/:id**
+Update quantity of product in cartt 
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### **DELETE /api/cart/:id**
+Remove product from cart
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### **GET /api/wishlist/:userId**
+Get wishlist of a user
 
-### Code Splitting
+### **POST /api/wishlist**
+Add product to wishlist
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+### **DELETE /api/wishlist/:id**
+Remove product from wishlist
 
-### Analyzing the Bundle Size
+### **GET /api/orders/:userId**
+Get all orders of a user
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### **POST /api/orders**
+Create a new order
 
-### Making a Progressive Web App
+## **POST /api/users/:userId/address**
+Create address by user
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## **DELETE "/api/users/:userId/address/:index**
+Delete address
 
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+--- ## Contact For bugs or feature requests, please reach out to sdmande101195@gmail.com
